@@ -1,0 +1,11 @@
+Table: project_members
+Description: junction table เชื่อม user กับ project พร้อม role user ต้องเป็นสมาชิก team ก่อนจึงจะเข้าร่วม project ได้
+Columns:
+  id         UUID PRIMARY KEY,                                        -- รหัส
+  team_id    UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,     -- FK → teams
+  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,  -- FK → projects: project ที่ user เข้าร่วม
+  user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,     -- FK → users: user ที่เป็นสมาชิก project
+  role       TEXT NOT NULL,                                            -- MANAGER (ควบคุม project) / CONTRIBUTOR (บันทึก time entry ได้) / VIEWER (ดูอย่างเดียว)
+  created_at TIMESTAMPTZ NOT NULL,                                     -- วันที่เพิ่มเข้า project
+  updated_at TIMESTAMPTZ NOT NULL                                      -- วันที่แก้ไขล่าสุด
+  -- UNIQUE (project_id, user_id): user อยู่ใน project เดียวกันได้แค่ครั้งเดียว

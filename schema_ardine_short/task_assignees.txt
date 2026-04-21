@@ -1,0 +1,9 @@
+Table: task_assignees
+Description: junction table เชื่อม user กับ task task หนึ่งมี assignee ได้หลายคน
+Columns:
+  id         UUID PRIMARY KEY,                                              -- รหัส
+  team_id    UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,           -- FK → teams
+  task_id    UUID NOT NULL REFERENCES project_tasks(id) ON DELETE CASCADE,  -- FK → project_tasks: task ที่ assign
+  user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,          -- FK → users: user ที่รับผิดชอบ task
+  created_at TIMESTAMPTZ NOT NULL                                           -- วันที่ assign
+  -- UNIQUE (task_id, user_id): assign user คนเดียวกันซ้ำไม่ได้

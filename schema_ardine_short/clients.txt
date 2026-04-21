@@ -1,0 +1,15 @@
+Table: clients
+Description: ลูกค้าของแต่ละ team เป็นเจ้าของ project และ invoice มีอัตราค่าบริการ default และสถานะ archive
+Columns:
+  id                        UUID PRIMARY KEY,                                    -- รหัส client
+  team_id                   UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE, -- FK → teams: team เจ้าของ client
+  name                      VARCHAR(255) NOT NULL,                               -- ชื่อบริษัท/ลูกค้า unique ภายใน team (case-insensitive)
+  email                     VARCHAR(255),                                        -- อีเมลหลักสำหรับติดต่อ
+  phone                     VARCHAR(50),                                         -- เบอร์โทรศัพท์
+  contact_name              VARCHAR(120),                                        -- ชื่อผู้ติดต่อฝั่งลูกค้า
+  billing_address           JSONB,                                               -- ที่อยู่ billing สำหรับออก invoice เก็บเป็น JSON object
+  tax_id                    VARCHAR(64),                                         -- เลขประจำตัวผู้เสียภาษีของลูกค้า
+  notes                     TEXT,                                                -- โน้ตภายในสำหรับทีม ลูกค้าไม่เห็น
+  default_hourly_rate_cents INTEGER,                                             -- ราคาต่อชั่วโมง default หน่วยสตางค์ เช่น 12000 = 120 บาท/ชม. (project และ task สามารถ override ได้)
+  currency                  VARCHAR(3) NOT NULL DEFAULT 'USD',                   -- สกุลเงิน เช่น THB, USD, SGD
+  archived_at               TIMESTAMPTZ                                          -- ถ้ามีค่า = client ถูก archive แล้ว ไม่ active แต่ยัง query historical data ได้

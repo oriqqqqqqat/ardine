@@ -1,0 +1,9 @@
+Table: teams
+Description: หน่วยองค์กรหลัก ข้อมูลทั้งหมดในระบบผูกกับ team เสมอ user คนหนึ่งสามารถอยู่ได้หลาย team
+Columns:
+  id              UUID PRIMARY KEY,     -- รหัส team สร้างอัตโนมัติ
+  name            TEXT NOT NULL,        -- ชื่อ team ความยาว 2-120 ตัวอักษร
+  slug            TEXT NOT NULL UNIQUE, -- URL-friendly name เช่น "crafted-studio" ต้อง unique
+  billing_address JSONB,               -- ที่อยู่สำหรับออก invoice เก็บเป็น JSON (street, city, country, postal_code)
+  created_at      TIMESTAMPTZ NOT NULL, -- วันเวลาที่สร้าง team
+  updated_at      TIMESTAMPTZ NOT NULL  -- วันเวลาที่แก้ไขล่าสุด อัปเดตอัตโนมัติผ่าน trigger

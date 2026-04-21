@@ -1,0 +1,15 @@
+Table: invoices
+Description: ใบแจ้งหนี้ที่ออกให้ client แต่ละใบมี status, วันที่, และยอดเงินรวม invoice ที่ status='sent' และ due_date < วันปัจจุบัน ถือว่า overdue
+Columns:
+  id              UUID PRIMARY KEY,                                      -- รหัส invoice
+  team_id         UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,   -- FK → teams
+  client_id       UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE, -- FK → clients: client ที่ออก invoice ให้
+  invoice_number  VARCHAR(50) NOT NULL UNIQUE,                           -- เลขที่ invoice เช่น INV-2025-001 ต้อง unique ทั้งระบบ
+  status          VARCHAR(20) NOT NULL DEFAULT 'draft',                  -- สถานะ: draft (ร่าง) / sent (ส่งแล้ว รอจ่าย) / paid (จ่ายแล้ว) / cancelled (ยกเลิก)
+  issued_date     DATE NOT NULL,                                         -- วันที่ออก invoice
+  due_date        DATE NOT NULL,                                         -- วันครบกำหนดชำระ (status='sent' และ due_date < today = overdue)
+  subtotal_cents  INTEGER NOT NULL DEFAULT 0,                            -- ยอดรวมก่อนภาษี หน่วยสตางค์
+  tax_rate_percent NUMERIC(5,2) NOT NULL DEFAULT 0,                      -- อัตราภาษีเป็นเปอร์เซ็นต์ เช่น 7.00 = VAT 7%
+  tax_amount_cents INTEGER NOT NULL DEFAULT 0,                           -- จำนวนเงินภาษี หน่วยสตางค์
+  total_cents     INTEGER NOT NULL DEFAULT 0,                            -- ยอดรวมทั้งหมด = subtotal_cents + tax_amount_cents (หาร 100 ได้หน่วยเงินหลัก)
+  notes           TEXT   

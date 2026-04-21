@@ -1,0 +1,11 @@
+Table: team_memberships
+Description: เชื่อม user กับ team พร้อมกำหนด role ของ user ในแต่ละ team user 1 คนมีได้ 1 role ต่อ team
+Columns:
+  id         UUID PRIMARY KEY,                                    -- รหัส membership
+  team_id    UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE, -- FK → teams: team ที่ user เป็นสมาชิก
+  user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,  -- FK → users: user ที่เป็นสมาชิก
+  role       TEXT NOT NULL,                                        -- OWNER / ADMIN / MEMBER / VIEWER / BILLING
+  invited_at TIMESTAMPTZ,                                          -- เวลาที่ได้รับ invitation (NULL = ไม่ได้ถูก invite)
+  joined_at  TIMESTAMPTZ NOT NULL,                                 -- เวลาที่เข้าร่วม team จริง
+  created_at TIMESTAMPTZ NOT NULL                                  -- วันที่สร้าง record
+  -- UNIQUE (team_id, user_id): user อยู่ใน team เดียวกันได้แค่ครั้งเดียว

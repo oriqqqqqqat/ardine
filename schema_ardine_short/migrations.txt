@@ -1,0 +1,6 @@
+Table: migrations
+Description: system table สำหรับ track การ migrate database schema ไม่ใช่ business data ใช้ภายในระบบเท่านั้น ไม่ควรนำมาใช้ใน business query
+Columns:
+  id          SERIAL PRIMARY KEY,       -- รหัส migration ลำดับอัตโนมัติ
+  name        VARCHAR(255) NOT NULL UNIQUE, -- ชื่อไฟล์ migration เช่น "001_create_teams_table"
+  executed_at TIMESTAMPTZ NOT NULL DEFAULT NOW() -- วันเวลาที่ migration นี้ถูก run

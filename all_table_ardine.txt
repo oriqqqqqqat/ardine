@@ -1,0 +1,190 @@
+Table: teams
+Description: หน่วยองค์กรหลัก ข้อมูลทั้งหมดในระบบผูกกับ team เสมอ user คนหนึ่งสามารถอยู่ได้หลาย team
+Columns:
+  id              UUID PRIMARY KEY,     -- รหัส team สร้างอัตโนมัติ
+  name            TEXT NOT NULL,        -- ชื่อ team ความยาว 2-120 ตัวอักษร
+  slug            TEXT NOT NULL UNIQUE, -- URL-friendly name เช่น "crafted-studio" ต้อง unique
+  billing_address JSONB,               -- ที่อยู่สำหรับออก invoice เก็บเป็น JSON (street, city, country, postal_code)
+  created_at      TIMESTAMPTZ NOT NULL, -- วันเวลาที่สร้าง team
+  updated_at      TIMESTAMPTZ NOT NULL  -- วันเวลาที่แก้ไขล่าสุด อัปเดตอัตโนมัติผ่าน trigger
+
+Table: users
+Description: ผู้ใช้งานในระบบ login ด้วย email และ password user คนหนึ่งสามารถเป็นสมาชิกได้หลาย team และมี role ต่างกันในแต่ละ team
+Columns:
+  id                  UUID PRIMARY KEY,         -- รหัส user สร้างอัตโนมัติ
+  email               VARCHAR(255) NOT NULL UNIQUE, -- อีเมลสำหรับ login ต้อง unique ทั้งระบบ
+  name                VARCHAR(255) NOT NULL,    -- ชื่อจริงของผู้ใช้
+  password_hash       VARCHAR(255) NOT NULL,    -- bcrypt hash ของรหัสผ่าน ไม่เก็บรหัสผ่านตรงๆ
+  instance_role       TEXT NOT NULL DEFAULT 'USER', -- สิทธิ์ระดับระบบ: USER (ทั่วไป) หรือ ADMIN (จัดการทุก team ได้)
+  display_name        VARCHAR(120),             -- ชื่อที่แสดงใน UI แทนชื่อจริง เช่น ชื่อเล่น
+  email_verified_at   TIMESTAMPTZ,              -- เวลาที่ยืนยัน email ถ้า NULL = ยังไม่ยืนยัน
+  created_at          TIMESTAMPTZ NOT NULL,     -- วันที่สมัครสมาชิก
+  updated_at          TIMESTAMPTZ NOT NULL      -- วันที่แก้ไขข้อมูลล่าสุด
+
+Table: team_memberships
+Description: เชื่อม user กับ team พร้อมกำหนด role ของ user ในแต่ละ team user 1 คนมีได้ 1 role ต่อ team
+Columns:
+  id         UUID PRIMARY KEY,                                    -- รหัส membership
+  team_id    UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE, -- FK → teams: team ที่ user เป็นสมาชิก
+  user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,  -- FK → users: user ที่เป็นสมาชิก
+  role       TEXT NOT NULL,                                        -- OWNER / ADMIN / MEMBER / VIEWER / BILLING
+  invited_at TIMESTAMPTZ,                                          -- เวลาที่ได้รับ invitation (NULL = ไม่ได้ถูก invite)
+  joined_at  TIMESTAMPTZ NOT NULL,                                 -- เวลาที่เข้าร่วม team จริง
+  created_at TIMESTAMPTZ NOT NULL                                  -- วันที่สร้าง record
+  -- UNIQUE (team_id, user_id): user อยู่ใน team เดียวกันได้แค่ครั้งเดียว
+
+Table: invites
+Description: คำเชิญเข้าร่วม team ที่ยังรอการตอบรับ มี token สำหรับสร้าง invite link และมีวันหมดอายุ
+Columns:
+  id          UUID PRIMARY KEY,                                    -- รหัส invite
+  team_id     UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE, -- FK → teams: team ที่เชิญเข้า
+  email       TEXT NOT NULL,                                       -- อีเมลของผู้ถูกเชิญ
+  role        TEXT NOT NULL,                                       -- role ที่จะได้รับเมื่อ accept: OWNER / ADMIN / MEMBER / VIEWER / BILLING
+  token       TEXT NOT NULL UNIQUE,                                -- token สุ่มสำหรับสร้าง invite link
+  expires_at  TIMESTAMPTZ NOT NULL,                                -- วันหมดอายุ invitation ที่เลยวันนี้และ accepted_at IS NULL = expired
+  accepted_at TIMESTAMPTZ,                                         -- เวลาที่ accept NULL = ยังรอการตอบรับ
+  created_at  TIMESTAMPTZ NOT NULL                                 -- วันที่สร้าง invitation
+  -- UNIQUE (team_id, email): invite ได้แค่ 1 ครั้งต่อ email ต่อ team
+
+Table: clients
+Description: ลูกค้าของแต่ละ team เป็นเจ้าของ project และ invoice มีอัตราค่าบริการ default และสถานะ archive
+Columns:
+  id                        UUID PRIMARY KEY,                                    -- รหัส client
+  team_id                   UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE, -- FK → teams: team เจ้าของ client
+  name                      VARCHAR(255) NOT NULL,                               -- ชื่อบริษัท/ลูกค้า unique ภายใน team (case-insensitive)
+  email                     VARCHAR(255),                                        -- อีเมลหลักสำหรับติดต่อ
+  phone                     VARCHAR(50),                                         -- เบอร์โทรศัพท์
+  contact_name              VARCHAR(120),                                        -- ชื่อผู้ติดต่อฝั่งลูกค้า
+  billing_address           JSONB,                                               -- ที่อยู่ billing สำหรับออก invoice เก็บเป็น JSON object
+  tax_id                    VARCHAR(64),                                         -- เลขประจำตัวผู้เสียภาษีของลูกค้า
+  notes                     TEXT,                                                -- โน้ตภายในสำหรับทีม ลูกค้าไม่เห็น
+  default_hourly_rate_cents INTEGER,                                             -- ราคาต่อชั่วโมง default หน่วยสตางค์ เช่น 12000 = 120 บาท/ชม. (project และ task สามารถ override ได้)
+  currency                  VARCHAR(3) NOT NULL DEFAULT 'USD',                   -- สกุลเงิน เช่น THB, USD, SGD
+  archived_at               TIMESTAMPTZ                                          -- ถ้ามีค่า = client ถูก archive แล้ว ไม่ active แต่ยัง query historical data ได้
+
+Table: projects
+Description: งานหรือโครงการที่รับจาก client มี status, budget, timeline และ tag มี rate ค่าบริการเป็นของตัวเอง (override จาก client)
+Columns:
+  id                        UUID PRIMARY KEY,                                      -- รหัส project
+  team_id                   UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,   -- FK → teams: team เจ้าของ
+  client_id                 UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE, -- FK → clients: client เจ้าของ project
+  name                      VARCHAR(255) NOT NULL,                                  -- ชื่อ project unique ภายใน team (case-insensitive)
+  code                      TEXT,                                                   -- รหัสย่อ project เช่น GL-001, FF-002
+  description               TEXT,                                                   -- รายละเอียด project
+  status                    TEXT NOT NULL DEFAULT 'active',                         -- สถานะ: active / completed / on_hold / archived
+  color                     TEXT,                                                   -- สี hex สำหรับแสดงใน UI เช่น "#4CAF50"
+  tags                      TEXT[] NOT NULL DEFAULT '{}',                           -- array ของ tag เช่น {web, nextjs, ecommerce}
+  default_hourly_rate_cents INTEGER,                                                -- ราคาต่อชั่วโมง default หน่วยสตางค์ override ค่าจาก client
+  budget_type               TEXT,                                                   -- ประเภท budget: none / hours / amount
+  budget_hours              INTEGER,                                                -- จำนวนชั่วโมงสูงสุด ใช้เมื่อ budget_type = 'hours'
+  budget_amount_cents       INTEGER,                                                -- วงเงิน budget สูงสุด หน่วยสตางค์ ใช้เมื่อ budget_type = 'amount'
+  start_date                DATE,                                                   -- วันเริ่มต้น project
+  due_date                  DATE,                                                   -- วันกำหนดส่ง project
+  archived_at               TIMESTAMPTZ                                             -- ถ้ามีค่า = project ถูก archive แล้ว
+  -- Rate resolution order (ลำดับความสำคัญของราคา): task > project > client
+
+Table: project_members
+Description: junction table เชื่อม user กับ project พร้อม role user ต้องเป็นสมาชิก team ก่อนจึงจะเข้าร่วม project ได้
+Columns:
+  id         UUID PRIMARY KEY,                                        -- รหัส
+  team_id    UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,     -- FK → teams
+  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,  -- FK → projects: project ที่ user เข้าร่วม
+  user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,     -- FK → users: user ที่เป็นสมาชิก project
+  role       TEXT NOT NULL,                                            -- MANAGER (ควบคุม project) / CONTRIBUTOR (บันทึก time entry ได้) / VIEWER (ดูอย่างเดียว)
+  created_at TIMESTAMPTZ NOT NULL,                                     -- วันที่เพิ่มเข้า project
+  updated_at TIMESTAMPTZ NOT NULL                                      -- วันที่แก้ไขล่าสุด
+  -- UNIQUE (project_id, user_id): user อยู่ใน project เดียวกันได้แค่ครั้งเดียว
+
+Table: project_tasks
+Description: งานย่อย (task) ภายใน project แต่ละ task มี status, billable flag และกำหนด hourly rate ของตัวเองได้ (override rate ของ project)
+Columns:
+  id                UUID PRIMARY KEY,                                        -- รหัส task
+  team_id           UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,     -- FK → teams
+  project_id        UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,  -- FK → projects: project ที่ task สังกัด
+  name              TEXT NOT NULL,                                            -- ชื่อ task ความยาว 1-255 ตัวอักษร unique ภายใน project (case-insensitive)
+  description       TEXT,                                                     -- รายละเอียดของ task
+  status            TEXT NOT NULL DEFAULT 'active',                           -- สถานะ: active / completed / on_hold / archived
+  billable          BOOLEAN NOT NULL DEFAULT TRUE,                            -- true = เวลาที่บันทึกในงานนี้คิดเงินลูกค้า / false = งาน internal ไม่คิดเงิน
+  hourly_rate_cents INTEGER,                                                  -- ราคาต่อชั่วโมงเฉพาะ task นี้ หน่วยสตางค์ ถ้ามีค่าจะ override ราคาของ project และ client
+  tags              TEXT[] NOT NULL DEFAULT '{}',                             -- array ของ tag
+  order_index       INTEGER                                                   -- ลำดับแสดงผลใน UI
+
+Table: task_assignees
+Description: junction table เชื่อม user กับ task task หนึ่งมี assignee ได้หลายคน
+Columns:
+  id         UUID PRIMARY KEY,                                              -- รหัส
+  team_id    UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,           -- FK → teams
+  task_id    UUID NOT NULL REFERENCES project_tasks(id) ON DELETE CASCADE,  -- FK → project_tasks: task ที่ assign
+  user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,          -- FK → users: user ที่รับผิดชอบ task
+  created_at TIMESTAMPTZ NOT NULL                                           -- วันที่ assign
+  -- UNIQUE (task_id, user_id): assign user คนเดียวกันซ้ำไม่ได้
+
+Table: time_entries
+Description: บันทึกเวลาทำงานของ user ในแต่ละ project และ task หัวใจหลักของระบบ time tracking เก็บเวลาเริ่ม-หยุด, ระยะเวลา, billable flag และมูลค่าเงิน
+Columns:
+  id                UUID PRIMARY KEY,                                        -- รหัส time entry
+  team_id           UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,     -- FK → teams
+  project_id        UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,  -- FK → projects: project ที่บันทึกเวลา
+  task_id           UUID REFERENCES project_tasks(id) ON DELETE SET NULL,    -- FK → project_tasks: task ที่บันทึกเวลา (optional ไม่จำเป็นต้องระบุ)
+  user_id           UUID REFERENCES users(id) ON DELETE CASCADE,             -- FK → users: user ที่ log เวลา
+  client_id         UUID REFERENCES clients(id) ON DELETE CASCADE,           -- FK → clients: denormalized จาก project เพื่อ query ง่ายขึ้นโดยไม่ต้อง JOIN projects
+  note              TEXT,                                                     -- คำอธิบายว่าทำอะไรใน session นี้
+  started_at        TIMESTAMPTZ NOT NULL,                                     -- เวลาเริ่มจับเวลา
+  stopped_at        TIMESTAMPTZ,                                              -- เวลาหยุดจับเวลา NULL = timer กำลังรันอยู่
+  duration_seconds  INTEGER,                                                  -- ระยะเวลาทำงานหน่วยวินาที คำนวณจาก stopped_at - started_at (หาร 3600 ได้ชั่วโมง)
+  billable          BOOLEAN NOT NULL DEFAULT TRUE,                            -- true = คิดเงินลูกค้า / false = งาน internal ไม่คิดเงิน
+  hourly_rate_cents INTEGER,                                                  -- ราคาต่อชั่วโมง ณ เวลาที่บันทึก หน่วยสตางค์ (snapshot ไว้ไม่เปลี่ยนย้อนหลัง)
+  amount_cents      INTEGER                                                   -- มูลค่าของ entry นี้ = duration_seconds / 3600 × hourly_rate_cents (NULL ถ้า billable = false)
+
+Table: invoices
+Description: ใบแจ้งหนี้ที่ออกให้ client แต่ละใบมี status, วันที่, และยอดเงินรวม invoice ที่ status='sent' และ due_date < วันปัจจุบัน ถือว่า overdue
+Columns:
+  id              UUID PRIMARY KEY,                                      -- รหัส invoice
+  team_id         UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,   -- FK → teams
+  client_id       UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE, -- FK → clients: client ที่ออก invoice ให้
+  invoice_number  VARCHAR(50) NOT NULL UNIQUE,                           -- เลขที่ invoice เช่น INV-2025-001 ต้อง unique ทั้งระบบ
+  status          VARCHAR(20) NOT NULL DEFAULT 'draft',                  -- สถานะ: draft (ร่าง) / sent (ส่งแล้ว รอจ่าย) / paid (จ่ายแล้ว) / cancelled (ยกเลิก)
+  issued_date     DATE NOT NULL,                                         -- วันที่ออก invoice
+  due_date        DATE NOT NULL,                                         -- วันครบกำหนดชำระ (status='sent' และ due_date < today = overdue)
+  subtotal_cents  INTEGER NOT NULL DEFAULT 0,                            -- ยอดรวมก่อนภาษี หน่วยสตางค์
+  tax_rate_percent NUMERIC(5,2) NOT NULL DEFAULT 0,                      -- อัตราภาษีเป็นเปอร์เซ็นต์ เช่น 7.00 = VAT 7%
+  tax_amount_cents INTEGER NOT NULL DEFAULT 0,                           -- จำนวนเงินภาษี หน่วยสตางค์
+  total_cents     INTEGER NOT NULL DEFAULT 0,                            -- ยอดรวมทั้งหมด = subtotal_cents + tax_amount_cents (หาร 100 ได้หน่วยเงินหลัก)
+  notes           TEXT                                                   -- หมายเหตุที่แสดงบน invoice
+
+Table: invoice_items
+Description: รายการย่อยแต่ละบรรทัดใน invoice แต่ละ item อธิบายค่าบริการ จำนวน และราคา สามารถเชื่อมกับ time entry ได้
+Columns:
+  id             UUID PRIMARY KEY,                                          -- รหัส item
+  team_id        UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,       -- FK → teams
+  invoice_id     UUID NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,    -- FK → invoices: invoice ที่ item นี้สังกัด
+  time_entry_id  UUID REFERENCES time_entries(id) ON DELETE SET NULL,       -- FK → time_entries: time entry ที่เชื่อมกับ item นี้ (NULL = fixed-price item)
+  description    TEXT NOT NULL,                                              -- คำอธิบายรายการ เช่น "Frontend Development"
+  quantity       NUMERIC(10,2) NOT NULL,                                     -- จำนวน เช่น ชั่วโมงทำงาน 8.50
+  rate_cents     INTEGER NOT NULL,                                           -- ราคาต่อหน่วย หน่วยสตางค์
+  amount_cents   INTEGER NOT NULL,                                           -- ยอดรวมของ item = quantity × rate_cents
+  created_at     TIMESTAMPTZ NOT NULL                                        -- วันที่สร้าง item
+
+Table: invoice_time_entries
+Description: junction table ที่ track ว่า time entry ใดถูกรวมใน invoice ใดแล้ว ป้องกัน double billing (time entry เดียวกัน invoice ได้แค่ครั้งเดียว)
+Columns:
+  id              UUID PRIMARY KEY,                                              -- รหัส
+  invoice_id      UUID NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,       -- FK → invoices: invoice ที่ time entry ถูกรวมอยู่
+  time_entry_id   UUID NOT NULL UNIQUE REFERENCES time_entries(id) ON DELETE CASCADE, -- FK → time_entries: UNIQUE = 1 time entry invoice ได้แค่ครั้งเดียว
+  invoice_item_id UUID REFERENCES invoice_items(id) ON DELETE CASCADE,          -- FK → invoice_items: line item ที่ time entry นี้สังกัด
+  created_at      TIMESTAMPTZ NOT NULL                                           -- วันที่เชื่อม
+
+Table: sessions
+Description: session การ login ของ user ใช้สำหรับ authentication ระบบ session-based
+Columns:
+  id         VARCHAR(255) PRIMARY KEY,                                -- session token สุ่มสร้าง ใช้เป็น cookie
+  user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,   -- FK → users: user เจ้าของ session
+  expires_at TIMESTAMPTZ NOT NULL,                                   -- วันหมดอายุของ session
+  created_at TIMESTAMPTZ NOT NULL                                    -- วันที่ login
+
+Table: migrations
+Description: system table สำหรับ track การ migrate database schema ไม่ใช่ business data ใช้ภายในระบบเท่านั้น ไม่ควรนำมาใช้ใน business query
+Columns:
+  id          SERIAL PRIMARY KEY,       -- รหัส migration ลำดับอัตโนมัติ
+  name        VARCHAR(255) NOT NULL UNIQUE, -- ชื่อไฟล์ migration เช่น "001_create_teams_table"
+  executed_at TIMESTAMPTZ NOT NULL DEFAULT NOW() -- วันเวลาที่ migration นี้ถูก run

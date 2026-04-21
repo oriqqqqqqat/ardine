@@ -1,0 +1,16 @@
+Table: time_entries
+Description: บันทึกเวลาทำงานของ user ในแต่ละ project และ task หัวใจหลักของระบบ time tracking เก็บเวลาเริ่ม-หยุด, ระยะเวลา, billable flag และมูลค่าเงิน
+Columns:
+  id                UUID PRIMARY KEY,                                        -- รหัส time entry
+  team_id           UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,     -- FK → teams
+  project_id        UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,  -- FK → projects: project ที่บันทึกเวลา
+  task_id           UUID REFERENCES project_tasks(id) ON DELETE SET NULL,    -- FK → project_tasks: task ที่บันทึกเวลา (optional ไม่จำเป็นต้องระบุ)
+  user_id           UUID REFERENCES users(id) ON DELETE CASCADE,             -- FK → users: user ที่ log เวลา
+  client_id         UUID REFERENCES clients(id) ON DELETE CASCADE,           -- FK → clients: denormalized จาก project เพื่อ query ง่ายขึ้นโดยไม่ต้อง JOIN projects
+  note              TEXT,                                                     -- คำอธิบายว่าทำอะไรใน session นี้
+  started_at        TIMESTAMPTZ NOT NULL,                                     -- เวลาเริ่มจับเวลา
+  stopped_at        TIMESTAMPTZ,                                              -- เวลาหยุดจับเวลา NULL = timer กำลังรันอยู่
+  duration_seconds  INTEGER,                                                  -- ระยะเวลาทำงานหน่วยวินาที คำนวณจาก stopped_at - started_at (หาร 3600 ได้ชั่วโมง)
+  billable          BOOLEAN NOT NULL DEFAULT TRUE,                            -- true = คิดเงินลูกค้า / false = งาน internal ไม่คิดเงิน
+  hourly_rate_cents INTEGER,                                                  -- ราคาต่อชั่วโมง ณ เวลาที่บันทึก หน่วยสตางค์ (snapshot ไว้ไม่เปลี่ยนย้อนหลัง)
+  amount_cents      INTEGER  

@@ -1,0 +1,12 @@
+Table: users
+Description: ผู้ใช้งานในระบบ login ด้วย email และ password user คนหนึ่งสามารถเป็นสมาชิกได้หลาย team และมี role ต่างกันในแต่ละ team
+Columns:
+  id                  UUID PRIMARY KEY,         -- รหัส user สร้างอัตโนมัติ
+  email               VARCHAR(255) NOT NULL UNIQUE, -- อีเมลสำหรับ login ต้อง unique ทั้งระบบ
+  name                VARCHAR(255) NOT NULL,    -- ชื่อจริงของผู้ใช้
+  password_hash       VARCHAR(255) NOT NULL,    -- bcrypt hash ของรหัสผ่าน ไม่เก็บรหัสผ่านตรงๆ
+  instance_role       TEXT NOT NULL DEFAULT 'USER', -- สิทธิ์ระดับระบบ: USER (ทั่วไป) หรือ ADMIN (จัดการทุก team ได้)
+  display_name        VARCHAR(120),             -- ชื่อที่แสดงใน UI แทนชื่อจริง เช่น ชื่อเล่น
+  email_verified_at   TIMESTAMPTZ,              -- เวลาที่ยืนยัน email ถ้า NULL = ยังไม่ยืนยัน
+  created_at          TIMESTAMPTZ NOT NULL,     -- วันที่สมัครสมาชิก
+  updated_at          TIMESTAMPTZ NOT NULL      -- วันที่แก้ไขข้อมูลล่าสุด

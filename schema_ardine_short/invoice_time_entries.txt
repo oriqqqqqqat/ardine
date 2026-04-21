@@ -1,0 +1,8 @@
+Table: invoice_time_entries
+Description: junction table ที่ track ว่า time entry ใดถูกรวมใน invoice ใดแล้ว ป้องกัน double billing (time entry เดียวกัน invoice ได้แค่ครั้งเดียว)
+Columns:
+  id              UUID PRIMARY KEY,                                              -- รหัส
+  invoice_id      UUID NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,       -- FK → invoices: invoice ที่ time entry ถูกรวมอยู่
+  time_entry_id   UUID NOT NULL UNIQUE REFERENCES time_entries(id) ON DELETE CASCADE, -- FK → time_entries: UNIQUE = 1 time entry invoice ได้แค่ครั้งเดียว
+  invoice_item_id UUID REFERENCES invoice_items(id) ON DELETE CASCADE,          -- FK → invoice_items: line item ที่ time entry นี้สังกัด
+  created_at      TIMESTAMPTZ NOT NULL   

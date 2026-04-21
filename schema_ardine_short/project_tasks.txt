@@ -1,0 +1,13 @@
+Table: project_tasks
+Description: งานย่อย (task) ภายใน project แต่ละ task มี status, billable flag และกำหนด hourly rate ของตัวเองได้ (override rate ของ project)
+Columns:
+  id                UUID PRIMARY KEY,                                        -- รหัส task
+  team_id           UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,     -- FK → teams
+  project_id        UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,  -- FK → projects: project ที่ task สังกัด
+  name              TEXT NOT NULL,                                            -- ชื่อ task ความยาว 1-255 ตัวอักษร unique ภายใน project (case-insensitive)
+  description       TEXT,                                                     -- รายละเอียดของ task
+  status            TEXT NOT NULL DEFAULT 'active',                           -- สถานะ: active / completed / on_hold / archived
+  billable          BOOLEAN NOT NULL DEFAULT TRUE,                            -- true = เวลาที่บันทึกในงานนี้คิดเงินลูกค้า / false = งาน internal ไม่คิดเงิน
+  hourly_rate_cents INTEGER,                                                  -- ราคาต่อชั่วโมงเฉพาะ task นี้ หน่วยสตางค์ ถ้ามีค่าจะ override ราคาของ project และ client
+  tags              TEXT[] NOT NULL DEFAULT '{}',                             -- array ของ tag
+  order_index       INTEGER                                                   -- ลำดับแสดงผลใน UI

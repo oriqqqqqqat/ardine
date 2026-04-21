@@ -1,0 +1,7 @@
+Table: sessions
+Description: session การ login ของ user ใช้สำหรับ authentication ระบบ session-based
+Columns:
+  id         VARCHAR(255) PRIMARY KEY,                                -- session token สุ่มสร้าง ใช้เป็น cookie
+  user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,   -- FK → users: user เจ้าของ session
+  expires_at TIMESTAMPTZ NOT NULL,                                   -- วันหมดอายุของ session
+  created_at TIMESTAMPTZ NOT NULL   

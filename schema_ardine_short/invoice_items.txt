@@ -1,0 +1,12 @@
+Table: invoice_items
+Description: รายการย่อยแต่ละบรรทัดใน invoice แต่ละ item อธิบายค่าบริการ จำนวน และราคา สามารถเชื่อมกับ time entry ได้
+Columns:
+  id             UUID PRIMARY KEY,                                          -- รหัส item
+  team_id        UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,       -- FK → teams
+  invoice_id     UUID NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,    -- FK → invoices: invoice ที่ item นี้สังกัด
+  time_entry_id  UUID REFERENCES time_entries(id) ON DELETE SET NULL,       -- FK → time_entries: time entry ที่เชื่อมกับ item นี้ (NULL = fixed-price item)
+  description    TEXT NOT NULL,                                              -- คำอธิบายรายการ เช่น "Frontend Development"
+  quantity       NUMERIC(10,2) NOT NULL,                                     -- จำนวน เช่น ชั่วโมงทำงาน 8.50
+  rate_cents     INTEGER NOT NULL,                                           -- ราคาต่อหน่วย หน่วยสตางค์
+  amount_cents   INTEGER NOT NULL,                                           -- ยอดรวมของ item = quantity × rate_cents
+  created_at     TIMESTAMPTZ NOT NULL 

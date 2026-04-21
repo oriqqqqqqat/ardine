@@ -1,0 +1,20 @@
+Table: projects
+Description: งานหรือโครงการที่รับจาก client มี status, budget, timeline และ tag มี rate ค่าบริการเป็นของตัวเอง (override จาก client)
+Columns:
+  id                        UUID PRIMARY KEY,                                      -- รหัส project
+  team_id                   UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,   -- FK → teams: team เจ้าของ
+  client_id                 UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE, -- FK → clients: client เจ้าของ project
+  name                      VARCHAR(255) NOT NULL,                                  -- ชื่อ project unique ภายใน team (case-insensitive)
+  code                      TEXT,                                                   -- รหัสย่อ project เช่น GL-001, FF-002
+  description               TEXT,                                                   -- รายละเอียด project
+  status                    TEXT NOT NULL DEFAULT 'active',                         -- สถานะ: active / completed / on_hold / archived
+  color                     TEXT,                                                   -- สี hex สำหรับแสดงใน UI เช่น "#4CAF50"
+  tags                      TEXT[] NOT NULL DEFAULT '{}',                           -- array ของ tag เช่น {web, nextjs, ecommerce}
+  default_hourly_rate_cents INTEGER,                                                -- ราคาต่อชั่วโมง default หน่วยสตางค์ override ค่าจาก client
+  budget_type               TEXT,                                                   -- ประเภท budget: none / hours / amount
+  budget_hours              INTEGER,                                                -- จำนวนชั่วโมงสูงสุด ใช้เมื่อ budget_type = 'hours'
+  budget_amount_cents       INTEGER,                                                -- วงเงิน budget สูงสุด หน่วยสตางค์ ใช้เมื่อ budget_type = 'amount'
+  start_date                DATE,                                                   -- วันเริ่มต้น project
+  due_date                  DATE,                                                   -- วันกำหนดส่ง project
+  archived_at               TIMESTAMPTZ                                             -- ถ้ามีค่า = project ถูก archive แล้ว
+  -- Rate resolution order (ลำดับความสำคัญของราคา): task > project > client

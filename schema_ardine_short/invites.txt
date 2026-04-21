@@ -1,0 +1,12 @@
+Table: invites
+Description: คำเชิญเข้าร่วม team ที่ยังรอการตอบรับ มี token สำหรับสร้าง invite link และมีวันหมดอายุ
+Columns:
+  id          UUID PRIMARY KEY,                                    -- รหัส invite
+  team_id     UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE, -- FK → teams: team ที่เชิญเข้า
+  email       TEXT NOT NULL,                                       -- อีเมลของผู้ถูกเชิญ
+  role        TEXT NOT NULL,                                       -- role ที่จะได้รับเมื่อ accept: OWNER / ADMIN / MEMBER / VIEWER / BILLING
+  token       TEXT NOT NULL UNIQUE,                                -- token สุ่มสำหรับสร้าง invite link
+  expires_at  TIMESTAMPTZ NOT NULL,                                -- วันหมดอายุ invitation ที่เลยวันนี้และ accepted_at IS NULL = expired
+  accepted_at TIMESTAMPTZ,                                         -- เวลาที่ accept NULL = ยังรอการตอบรับ
+  created_at  TIMESTAMPTZ NOT NULL                                 -- วันที่สร้าง invitation
+  -- UNIQUE (team_id, email): invite ได้แค่ 1 ครั้งต่อ email ต่อ team
