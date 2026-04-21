@@ -1,0 +1,343 @@
+Text-to-SQL Results
+Schema: all_tables.txt
+Model : models/gemini-2.5-flash-lite
+Date  : 2026-04-21 22:41:36
+============================================================
+
+[1] Q: ลูกค้าแต่ละรายมีโปรเจกต์อยู่กี่อัน
+    SQL:
+SELECT
+  c.name AS client_name,
+  COUNT(p.id) AS project_count
+FROM clients AS c
+LEFT JOIN projects AS p
+  ON c.id = p.client_id
+GROUP BY
+  c.name
+ORDER BY
+  client_name;
+    Result: [('CloudNine Singapore', 2), ('MegaCorp Japan', 2), ('OldSchool Corp', 1), ('StartupX Vietnam', 1), ('TechStart Thailand', 2), ('Worada Sarakhon', 0)]
+    Status: ✅ Success
+    Tokens: total=3881  input=3818  output=63
+------------------------------------------------------------
+
+[2] Q: invoice ไหนบ้างที่เลย due date แล้วแต่ยังไม่ได้จ่าย มีค้างอยู่กี่วันแล้ว
+    SQL:
+SELECT
+  id,
+  invoice_number,
+  client_id,
+  due_date,
+  total_cents,
+  EXTRACT(DAY FROM (NOW() - due_date)) AS days_overdue
+FROM
+  invoices
+WHERE
+  status = 'sent' AND due_date < NOW();
+    Result: [('d2000000-0000-0000-0000-000000000003', 'INV-2025-003', 'd1000000-0000-0000-0000-000000000001', datetime.date(2025, 3, 31), 240750, Decimal('386')), ('d2000000-0000-0000-0000-000000000006', 'INV-2025-006', 'd1000000-0000-0000-0000-000000000004', datetime.date(2025, 4, 14), 463250, Decimal('372'))]
+    Status: ✅ Success
+    Tokens: total=3896  input=3825  output=71
+------------------------------------------------------------
+
+[3] Q: มีใครบ้างที่อยู่มากกว่าหนึ่งทีม แล้วในแต่ละทีมได้ role อะไรบ้าง
+    SQL:
+SELECT
+  u.email AS user_email,
+  t.name AS team_name,
+  tm.role AS team_membership_role
+FROM
+  users u
+JOIN
+  team_memberships tm ON u.id = tm.user_id
+JOIN
+  teams t ON tm.team_id = t.id
+WHERE
+  u.id IN (
+    SELECT
+      user_id
+    FROM
+      team_memberships
+    GROUP BY
+      user_id
+    HAVING
+      COUNT(DISTINCT team_id) > 1
+  )
+ORDER BY
+  user_email,
+  team_name;
+    Result: [('alice@pixelcraft.io', 'DevOps Squad', 'VIEWER'), ('alice@pixelcraft.io', 'PixelCraft Studio', 'OWNER'), ('patworada2004@gmail.com', 'gugugaga', 'ADMIN'), ('patworada2004@gmail.com', 'Worada Sarakhon', 'OWNER')]
+    Status: ✅ Success
+    Tokens: total=3964  input=3821  output=143
+------------------------------------------------------------
+
+[4] Q: โปรเจกต์ไหนมีสมาชิกในโปรเจกต์มากที่สุด แล้วสมาชิกพวกนั้นมีใครบ้าง
+    SQL:
+WITH ProjectMemberCounts AS (
+  SELECT
+    project_id,
+    COUNT(user_id) AS member_count
+  FROM project_members
+  GROUP BY
+    project_id
+  ORDER BY
+    member_count DESC
+  LIMIT 1
+)
+SELECT
+  p.name AS project_name,
+  u.name AS user_name,
+  pm.role AS project_role
+FROM project_members pm
+JOIN users u
+  ON pm.user_id = u.id
+JOIN projects p
+  ON pm.project_id = p.id
+WHERE
+  pm.project_id = (
+    SELECT
+      project_id
+    FROM ProjectMemberCounts
+  );
+    Result: [('E-Commerce Platform Redesign', 'Alice Tanaka', 'MANAGER'), ('E-Commerce Platform Redesign', 'Bob Srisuk', 'CONTRIBUTOR'), ('E-Commerce Platform Redesign', 'Fiona Chen', 'CONTRIBUTOR')]
+    Status: ✅ Success
+    Tokens: total=3982  input=3826  output=156
+------------------------------------------------------------
+
+[5] Q: มีใครบ้างที่อยู่ในทีมแล้ว แต่ยังไม่ได้ถูกเพิ่มเข้าโปรเจกต์ไหนเลย
+    SQL:
+SELECT
+  u.name,
+  u.email,
+  t.name AS team_name
+FROM
+  users AS u
+JOIN
+  team_memberships AS tm ON u.id = tm.user_id
+JOIN
+  teams AS t ON tm.team_id = t.id
+WHERE
+  u.id NOT IN (
+    SELECT
+      pm.user_id
+    FROM
+      project_members AS pm
+    WHERE
+      pm.team_id = t.id
+  );
+    Result: [('Worada Sarakhon', 'patworada2004@gmail.com', 'Worada Sarakhon'), ('Alice Tanaka', 'alice@pixelcraft.io', 'DevOps Squad'), ('Worada Sarakhon', 'patworada2004@gmail.com', 'gugugaga'), ('sarakhon', '65070203@kmitl.ac.th', 'sarakhon')]
+    Status: ✅ Success
+    Tokens: total=3937  input=3824  output=113
+------------------------------------------------------------
+
+[6] Q: คนไหนบันทึกเวลาทำงานรวมมากที่สุดใน 30 วันที่ผ่านมา แล้วส่วนใหญ่ทำงานให้ลูกค้าคนไหน
+    SQL:
+WITH RecentTimeEntries AS (
+  SELECT
+    t.user_id,
+    t.client_id,
+    SUM(t.duration_seconds) AS total_duration_seconds
+  FROM time_entries AS t
+  WHERE
+    t.started_at >= NOW() - INTERVAL '30 days'
+    AND t.billable IS TRUE
+  GROUP BY
+    t.user_id,
+    t.client_id
+), RankedUsers AS (
+  SELECT
+    user_id,
+    client_id,
+    total_duration_seconds,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY total_duration_seconds DESC) AS rn
+  FROM RecentTimeEntries
+)
+SELECT
+  u.name AS user_name,
+  c.name AS most_worked_client_name,
+  (
+    SELECT
+      SUM(duration_seconds)
+    FROM time_entries AS te
+    WHERE
+      te.user_id = u.id AND te.started_at >= NOW() - INTERVAL '30 days'
+  ) AS total_duration_last_30_days_seconds
+FROM users AS u
+JOIN RankedUsers AS ru
+  ON u.id = ru.user_id
+LEFT JOIN clients AS c
+  ON ru.client_id = c.id
+WHERE
+  ru.rn = 1
+ORDER BY
+  total_duration_last_30_days_seconds DESC
+LIMIT 1;
+    Result: [('Diana Lee', 'CloudNine Singapore', 54000)]
+    Status: ✅ Success
+    Tokens: total=4162  input=3830  output=332
+------------------------------------------------------------
+
+[7] Q: มีผู้ใช้คนไหนบ้างที่ใช้อีเมลลงท้ายด้วย @kmitl.ac.th
+    SQL:
+SELECT email
+FROM users
+WHERE email LIKE '%@kmitl.ac.th';
+    Result: [('65070203@kmitl.ac.th',)]
+    Status: ✅ Success
+    Tokens: total=3846  input=3827  output=19
+------------------------------------------------------------
+
+[8] Q: ถ้าดูแยกเป็นทีม ทีมไหนมีชั่วโมงงานที่คิดเงินได้รวมเยอะที่สุด
+    SQL:
+SELECT
+  t.name AS team_name,
+  SUM(te.duration_seconds) AS total_billable_seconds
+FROM time_entries AS te
+JOIN teams AS t
+  ON te.team_id = t.id
+WHERE
+  te.billable = TRUE AND te.duration_seconds IS NOT NULL
+GROUP BY
+  t.name
+ORDER BY
+  total_billable_seconds DESC;
+    Result: [('PixelCraft Studio', 298800), ('DevOps Squad', 147600)]
+    Status: ✅ Success
+    Tokens: total=3920  input=3823  output=97
+------------------------------------------------------------
+
+[9] Q: โปรเจกต์ไหนมีการบันทึกเวลาเยอะ แต่จำนวนสมาชิกในโปรเจกต์น้อย
+    SQL:
+SELECT
+  p.name AS project_name,
+  SUM(te.duration_seconds) AS total_duration_seconds,
+  COUNT(DISTINCT pm.user_id) AS number_of_members
+FROM projects AS p
+JOIN time_entries AS te
+  ON p.id = te.project_id
+JOIN project_members AS pm
+  ON p.id = pm.project_id
+GROUP BY
+  p.id,
+  p.name
+ORDER BY
+  total_duration_seconds DESC,
+  number_of_members ASC
+LIMIT 1;
+    Result: [('E-Commerce Platform Redesign', 334800, 3)]
+    Status: ✅ Success
+    Tokens: total=3958  input=3825  output=133
+------------------------------------------------------------
+
+[10] Q: มีใครบ้างที่รับผิดชอบงานหลายอย่างในโปรเจกต์เดียวกัน มีงานอะไรบ้าง
+    SQL:
+SELECT
+  u.email AS user_email,
+  p.name AS project_name,
+  COUNT(DISTINCT ta.task_id) AS number_of_tasks_assigned
+FROM users AS u
+JOIN task_assignees AS ta
+  ON u.id = ta.user_id
+JOIN project_tasks AS pt
+  ON ta.task_id = pt.id
+JOIN projects AS p
+  ON pt.project_id = p.id
+GROUP BY
+  u.email,
+  p.name
+HAVING
+  COUNT(DISTINCT ta.task_id) > 1;
+    Result: [('bob@pixelcraft.io', 'E-Commerce Platform Redesign', 2), ('charlie@pixelcraft.io', 'Mobile App MVP', 2)]
+    Status: ✅ Success
+    Tokens: total=3965  input=3825  output=140
+------------------------------------------------------------
+
+[11] Q: มีใครบ้างที่อยู่หลายทีม แต่มีการลงเวลาอยู่แค่ทีมเดียว
+    SQL:
+WITH UserTeamCounts AS (
+    SELECT
+        user_id,
+        COUNT(DISTINCT team_id) AS distinct_teams
+    FROM
+        team_memberships
+    GROUP BY
+        user_id
+    HAVING
+        COUNT(DISTINCT team_id) > 1
+),
+UserTimeEntryTeams AS (
+    SELECT DISTINCT
+        user_id,
+        team_id
+    FROM
+        time_entries
+    WHERE
+        user_id IN (SELECT user_id FROM UserTeamCounts)
+)
+SELECT
+    u.email,
+    u.name
+FROM
+    users u
+WHERE
+    u.id IN (
+        SELECT
+            utt.user_id
+        FROM
+            UserTimeEntryTeams utt
+        GROUP BY
+            utt.user_id
+        HAVING
+            COUNT(DISTINCT utt.team_id) = 1
+    )
+    AND u.id IN (SELECT user_id FROM UserTeamCounts);
+    Result: [('alice@pixelcraft.io', 'Alice Tanaka')]
+    Status: ✅ Success
+    Tokens: total=4035  input=3820  output=215
+------------------------------------------------------------
+
+[12] Q: ตอนนี้แต่ละทีมมี owner กับ admin เป็นใครบ้าง
+    SQL:
+SELECT
+  t.name AS team_name,
+  tm.role,
+  u.name AS user_name,
+  u.email AS user_email
+FROM teams AS t
+JOIN team_memberships AS tm
+  ON t.id = tm.team_id
+JOIN users AS u
+  ON tm.user_id = u.id
+WHERE
+  tm.role IN ('OWNER', 'ADMIN')
+ORDER BY
+  t.name,
+  tm.role;
+    Result: [('DevOps Squad', 'OWNER', 'Diana Lee', 'diana@devops.io'), ('gugugaga', 'ADMIN', 'Worada Sarakhon', 'patworada2004@gmail.com'), ('PixelCraft Studio', 'ADMIN', 'Bob Srisuk', 'bob@pixelcraft.io'), ('PixelCraft Studio', 'OWNER', 'Alice Tanaka', 'alice@pixelcraft.io'), ('sarakhon', 'OWNER', 'sarakhon', '65070203@kmitl.ac.th'), ('Worada Sarakhon', 'OWNER', 'Worada Sarakhon', 'patworada2004@gmail.com')]
+    Status: ✅ Success
+    Tokens: total=3924  input=3816  output=108
+------------------------------------------------------------
+
+[13] Q: คนที่ใช้อีเมล @kmitl.ac.th อยู่ในทีมไหนบ้าง และในแต่ละทีมมี role อะไร
+    SQL:
+SELECT
+  t.name AS team_name,
+  tm.role AS team_role
+FROM users AS u
+JOIN team_memberships AS tm
+  ON u.id = tm.user_id
+JOIN teams AS t
+  ON tm.team_id = t.id
+WHERE
+  u.email LIKE '%@kmitl.ac.th';
+    Result: [('sarakhon', 'OWNER')]
+    Status: ✅ Success
+    Tokens: total=3916  input=3831  output=85
+------------------------------------------------------------
+
+Summary
+  Total questions : 13
+  Success         : 13
+  Failed          : 0
+  Accuracy        : 100.0%
+  Total tokens    : 51386
+  Avg tokens/Q    : 3952
