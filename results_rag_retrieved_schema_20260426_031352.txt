@@ -1,0 +1,659 @@
+Text-to-SQL Results (RAG: retrieved schema)
+Schema source : schema_ardine_short (pgvector)
+Top-k         : 5
+Model         : models/gemini-2.5-flash
+Date          : 2026-04-26 03:13:52
+============================================================
+
+[1] Q: ผู้ใช้แต่ละคนอยู่ทีมไหนบ้าง
+    Retrieved: team_membership, users, teams, project_members, invites
+    SQL:
+SELECT
+  u.name AS user_name,
+  t.name AS team_name
+FROM users AS u
+JOIN team_memberships AS tm
+  ON u.id = tm.user_id
+JOIN teams AS t
+  ON tm.team_id = t.id;
+    Result: [('Worada Sarakhon', 'Worada Sarakhon'), ('Alice Tanaka', 'PixelCraft Studio'), ('Bob Srisuk', 'PixelCraft Studio'), ('Charlie Nakamura', 'PixelCraft Studio'), ('Fiona Chen', 'PixelCraft Studio'), ('Diana Lee', 'DevOps Squad'), ('Evan Wirawan', 'DevOps Squad'), ('Alice Tanaka', 'DevOps Squad'), ('Worada Sarakhon', 'PixelCraft Studio'), ('Mina Chen', 'BrightWave Digital'), ('Arun Patel', 'BrightWave Digital'), ('Ploy Kittisak', 'BrightWave Digital'), ('Natt Wong', 'BrightWave Digital'), ('Iris Tan', 'BrightWave Digital'), ('Kenji Mori', 'Atlas Cloud Ops'), ('May Srisuda', 'Atlas Cloud Ops'), ('Oat Jirawat', 'Atlas Cloud Ops'), ('Sara Lim', 'Atlas Cloud Ops'), ('Tee Ratan', 'Atlas Cloud Ops'), ('Dr. Hana Lee', 'MediFlow Product Lab'), ('Win Chaiyasit', 'MediFlow Product Lab'), ('Beau Namfon', 'MediFlow Product Lab'), ('Paul Kim', 'MediFlow Product Lab'), ('Fern Pimsiri', 'MediFlow Product Lab'), ('Leo Park', 'LedgerLeaf Analytics'), ('Mook Sirin', 'LedgerLeaf Analytics'), ('Jin Seo', 'LedgerLeaf Analytics'), ('Aom Rung', 'LedgerLeaf Analytics'), ('Karn Phan', 'LedgerLeaf Analytics'), ('Nina Alvarez', 'Aurora Learning Studio'), ('Peem Nop', 'Aurora Learning Studio'), ('Fah Rinrada', 'Aurora Learning Studio'), ('Tom Yu', 'Aurora Learning Studio'), ('Mina Chen', 'Atlas Cloud Ops'), ('Sara Lim', 'LedgerLeaf Analytics'), ('Paul Kim', 'Aurora Learning Studio'), ('Aom Rung', 'BrightWave Digital'), ('Peem Nop', 'MediFlow Product Lab')]
+    Status: ✅ Success
+    Tokens: total=1268  input=1205  output=63
+------------------------------------------------------------
+
+[2] Q: แต่ละทีมมีสมาชิกคนใดบ้าง และแต่ละคนมีบทบาทอะไร
+    Retrieved: team_membership, project_members, teams, users, task_assignees
+    SQL:
+SELECT
+  t.name AS team_name,
+  u.name AS user_name,
+  tm.role AS team_role
+FROM teams AS t
+JOIN team_memberships AS tm
+  ON t.id = tm.team_id
+JOIN users AS u
+  ON tm.user_id = u.id;
+    Result: [('Worada Sarakhon', 'Worada Sarakhon', 'OWNER'), ('PixelCraft Studio', 'Alice Tanaka', 'OWNER'), ('PixelCraft Studio', 'Bob Srisuk', 'ADMIN'), ('PixelCraft Studio', 'Charlie Nakamura', 'MEMBER'), ('PixelCraft Studio', 'Fiona Chen', 'MEMBER'), ('DevOps Squad', 'Diana Lee', 'OWNER'), ('DevOps Squad', 'Evan Wirawan', 'MEMBER'), ('DevOps Squad', 'Alice Tanaka', 'VIEWER'), ('PixelCraft Studio', 'Worada Sarakhon', 'ADMIN'), ('BrightWave Digital', 'Mina Chen', 'OWNER'), ('BrightWave Digital', 'Arun Patel', 'ADMIN'), ('BrightWave Digital', 'Ploy Kittisak', 'MEMBER'), ('BrightWave Digital', 'Natt Wong', 'MEMBER'), ('BrightWave Digital', 'Iris Tan', 'BILLING'), ('Atlas Cloud Ops', 'Kenji Mori', 'OWNER'), ('Atlas Cloud Ops', 'May Srisuda', 'ADMIN'), ('Atlas Cloud Ops', 'Oat Jirawat', 'MEMBER'), ('Atlas Cloud Ops', 'Sara Lim', 'MEMBER'), ('Atlas Cloud Ops', 'Tee Ratan', 'BILLING'), ('MediFlow Product Lab', 'Dr. Hana Lee', 'OWNER'), ('MediFlow Product Lab', 'Win Chaiyasit', 'ADMIN'), ('MediFlow Product Lab', 'Beau Namfon', 'MEMBER'), ('MediFlow Product Lab', 'Paul Kim', 'MEMBER'), ('MediFlow Product Lab', 'Fern Pimsiri', 'BILLING'), ('LedgerLeaf Analytics', 'Leo Park', 'OWNER'), ('LedgerLeaf Analytics', 'Mook Sirin', 'ADMIN'), ('LedgerLeaf Analytics', 'Jin Seo', 'MEMBER'), ('LedgerLeaf Analytics', 'Aom Rung', 'MEMBER'), ('LedgerLeaf Analytics', 'Karn Phan', 'BILLING'), ('Aurora Learning Studio', 'Nina Alvarez', 'OWNER'), ('Aurora Learning Studio', 'Peem Nop', 'ADMIN'), ('Aurora Learning Studio', 'Fah Rinrada', 'MEMBER'), ('Aurora Learning Studio', 'Tom Yu', 'MEMBER'), ('Atlas Cloud Ops', 'Mina Chen', 'VIEWER'), ('LedgerLeaf Analytics', 'Sara Lim', 'MEMBER'), ('Aurora Learning Studio', 'Paul Kim', 'VIEWER'), ('BrightWave Digital', 'Aom Rung', 'MEMBER'), ('MediFlow Product Lab', 'Peem Nop', 'VIEWER')]
+    Status: ✅ Success
+    Tokens: total=1212  input=1139  output=73
+------------------------------------------------------------
+
+[3] Q: ลูกค้าแต่ละรายอยู่ภายใต้ทีมใด
+    Retrieved: teams, team_membership, users, clients, projects
+    SQL:
+SELECT
+  c.id,
+  c.name AS client_name,
+  t.name AS team_name
+FROM clients AS c
+JOIN teams AS t
+  ON c.team_id = t.id;
+    Result: [('e6f87dda-6cc3-4d0e-b34b-f84a6953053e', 'Worada Sarakhon', 'Worada Sarakhon'), ('d1000000-0000-0000-0000-000000000003', 'OldSchool Corp', 'PixelCraft Studio'), ('d1000000-0000-0000-0000-000000000002', 'MegaCorp Japan', 'PixelCraft Studio'), ('d1000000-0000-0000-0000-000000000001', 'TechStart Thailand', 'PixelCraft Studio'), ('d1000000-0000-0000-0000-000000000005', 'StartupX Vietnam', 'DevOps Squad'), ('d1000000-0000-0000-0000-000000000004', 'CloudNine Singapore', 'DevOps Squad'), ('d4000000-0000-0000-0000-000000000002', 'GreenBite Foods', 'BrightWave Digital'), ('d4000000-0000-0000-0000-000000000001', 'Luna Fashion House', 'BrightWave Digital'), ('d4000000-0000-0000-0000-000000000004', 'SkyBank Infrastructure', 'Atlas Cloud Ops'), ('d4000000-0000-0000-0000-000000000003', 'NovaShip Logistics', 'Atlas Cloud Ops'), ('d4000000-0000-0000-0000-000000000006', 'FitSphere Wellness', 'MediFlow Product Lab'), ('d4000000-0000-0000-0000-000000000005', 'VitaCare Clinic', 'MediFlow Product Lab'), ('d4000000-0000-0000-0000-000000000008', 'PropSense Realty', 'LedgerLeaf Analytics'), ('d4000000-0000-0000-0000-000000000007', 'CapitalBridge Finance', 'LedgerLeaf Analytics'), ('d4000000-0000-0000-0000-000000000010', 'TravelerJoy Media', 'Aurora Learning Studio'), ('d4000000-0000-0000-0000-000000000009', 'LearnLoop Academy', 'Aurora Learning Studio')]
+    Status: ✅ Success
+    Tokens: total=1536  input=1487  output=49
+------------------------------------------------------------
+
+[4] Q: โปรเจกต์แต่ละอันเป็นของลูกค้ารายใด
+    Retrieved: projects, project_members, clients, task_assignees, time_entries
+    SQL:
+SELECT
+  p.name,
+  c.name
+FROM projects AS p
+JOIN clients AS c
+  ON p.client_id = c.id;
+    Result: [('E-Commerce Platform Redesign', 'TechStart Thailand'), ('Mobile App MVP', 'TechStart Thailand'), ('Enterprise CRM Integration', 'MegaCorp Japan'), ('Data Analytics Dashboard', 'MegaCorp Japan'), ('Legacy System Migration', 'OldSchool Corp'), ('Kubernetes Migration', 'CloudNine Singapore'), ('CI/CD Pipeline Setup', 'CloudNine Singapore'), ('Infrastructure Audit', 'StartupX Vietnam'), ('Luxury Storefront Refresh', 'Luna Fashion House'), ('Campaign Microsite Factory', 'Luna Fashion House'), ('Influencer Asset Portal', 'Luna Fashion House'), ('Subscription Checkout Optimization', 'GreenBite Foods'), ('Packaging Feedback Dashboard', 'GreenBite Foods'), ('Franchise Location CMS', 'GreenBite Foods'), ('Fleet Control Tower', 'NovaShip Logistics'), ('Warehouse K8s Migration', 'NovaShip Logistics'), ('Driver Incident App API', 'NovaShip Logistics'), ('Zero Trust Rollout', 'SkyBank Infrastructure'), ('FinOps Savings Explorer', 'SkyBank Infrastructure'), ('Disaster Recovery Drills', 'SkyBank Infrastructure'), ('Patient App Revamp', 'VitaCare Clinic'), ('Telemedicine Booking Portal', 'VitaCare Clinic'), ('Insurance Claim Sync', 'VitaCare Clinic'), ('Nutrition Coach Dashboard', 'FitSphere Wellness'), ('Wearable Data Sync', 'FitSphere Wellness'), ('Habit Challenge Engine', 'FitSphere Wellness'), ('Executive Risk Dashboard', 'CapitalBridge Finance'), ('Collections Workflow Automation', 'CapitalBridge Finance'), ('Loan Origination UI Refresh', 'CapitalBridge Finance'), ('Valuation Model Workbench', 'PropSense Realty'), ('Broker Deal Tracker', 'PropSense Realty'), ('Investor Report Generator', 'PropSense Realty'), ('LMS Revamp', 'LearnLoop Academy'), ('Adaptive Quiz Engine', 'LearnLoop Academy'), ('Teacher Portal', 'LearnLoop Academy'), ('Creator Media Kit CMS', 'TravelerJoy Media'), ('Affiliate Revenue Reporting', 'TravelerJoy Media'), ('Trip Planner Community Feed', 'TravelerJoy Media')]
+    Status: ✅ Success
+    Tokens: total=1657  input=1622  output=35
+------------------------------------------------------------
+
+[5] Q: ผู้ใช้แต่ละคนอยู่ในโปรเจกต์ใดบ้าง
+    Retrieved: project_members, users, projects, time_entries, task_assignees
+    SQL:
+SELECT
+  u.name,
+  p.name
+FROM users AS u
+JOIN project_members AS pm
+  ON u.id = pm.user_id
+JOIN projects AS p
+  ON pm.project_id = p.id
+ORDER BY
+  u.name,
+  p.name;
+    Result: [('Alice Tanaka', 'E-Commerce Platform Redesign'), ('Alice Tanaka', 'Mobile App MVP'), ('Aom Rung', 'Collections Workflow Automation'), ('Aom Rung', 'Executive Risk Dashboard'), ('Aom Rung', 'Investor Report Generator'), ('Aom Rung', 'Loan Origination UI Refresh'), ('Aom Rung', 'Subscription Checkout Optimization'), ('Aom Rung', 'Valuation Model Workbench'), ('Arun Patel', 'Campaign Microsite Factory'), ('Arun Patel', 'Franchise Location CMS'), ('Arun Patel', 'Subscription Checkout Optimization'), ('Beau Namfon', 'Insurance Claim Sync'), ('Beau Namfon', 'Patient App Revamp'), ('Beau Namfon', 'Wearable Data Sync'), ('Bob Srisuk', 'Data Analytics Dashboard'), ('Bob Srisuk', 'E-Commerce Platform Redesign'), ('Bob Srisuk', 'Enterprise CRM Integration'), ('Charlie Nakamura', 'Enterprise CRM Integration'), ('Charlie Nakamura', 'Mobile App MVP'), ('Diana Lee', 'Infrastructure Audit'), ('Diana Lee', 'Kubernetes Migration'), ('Dr. Hana Lee', 'Insurance Claim Sync'), ('Dr. Hana Lee', 'Patient App Revamp'), ('Dr. Hana Lee', 'Wearable Data Sync'), ('Evan Wirawan', 'Infrastructure Audit'), ('Evan Wirawan', 'Kubernetes Migration'), ('Fah Rinrada', 'Affiliate Revenue Reporting'), ('Fah Rinrada', 'LMS Revamp'), ('Fah Rinrada', 'Teacher Portal'), ('Fah Rinrada', 'Trip Planner Community Feed'), ('Fern Pimsiri', 'Telemedicine Booking Portal'), ('Fern Pimsiri', 'Wearable Data Sync'), ('Fiona Chen', 'Data Analytics Dashboard'), ('Fiona Chen', 'E-Commerce Platform Redesign'), ('Iris Tan', 'Campaign Microsite Factory'), ('Iris Tan', 'Packaging Feedback Dashboard'), ('Jin Seo', 'Broker Deal Tracker'), ('Jin Seo', 'Executive Risk Dashboard'), ('Jin Seo', 'Loan Origination UI Refresh'), ('Karn Phan', 'Broker Deal Tracker'), ('Karn Phan', 'Collections Workflow Automation'), ('Kenji Mori', 'Driver Incident App API'), ('Kenji Mori', 'FinOps Savings Explorer'), ('Kenji Mori', 'Fleet Control Tower'), ('Leo Park', 'Broker Deal Tracker'), ('Leo Park', 'Executive Risk Dashboard'), ('Leo Park', 'Loan Origination UI Refresh'), ('May Srisuda', 'Disaster Recovery Drills'), ('May Srisuda', 'Warehouse K8s Migration'), ('May Srisuda', 'Zero Trust Rollout'), ('Mina Chen', 'Disaster Recovery Drills'), ('Mina Chen', 'Influencer Asset Portal'), ('Mina Chen', 'Luxury Storefront Refresh'), ('Mina Chen', 'Packaging Feedback Dashboard'), ('Mina Chen', 'Warehouse K8s Migration'), ('Mook Sirin', 'Collections Workflow Automation'), ('Mook Sirin', 'Investor Report Generator'), ('Mook Sirin', 'Valuation Model Workbench'), ('Natt Wong', 'Campaign Microsite Factory'), ('Natt Wong', 'Franchise Location CMS'), ('Natt Wong', 'Influencer Asset Portal'), ('Natt Wong', 'Luxury Storefront Refresh'), ('Natt Wong', 'Subscription Checkout Optimization'), ('Nina Alvarez', 'Affiliate Revenue Reporting'), ('Nina Alvarez', 'LMS Revamp'), ('Nina Alvarez', 'Teacher Portal'), ('Oat Jirawat', 'Driver Incident App API'), ('Oat Jirawat', 'FinOps Savings Explorer'), ('Oat Jirawat', 'Fleet Control Tower'), ('Paul Kim', 'Creator Media Kit CMS'), ('Paul Kim', 'Habit Challenge Engine'), ('Paul Kim', 'Insurance Claim Sync'), ('Paul Kim', 'Nutrition Coach Dashboard'), ('Paul Kim', 'Patient App Revamp'), ('Paul Kim', 'Telemedicine Booking Portal'), ('Peem Nop', 'Adaptive Quiz Engine'), ('Peem Nop', 'Creator Media Kit CMS'), ('Peem Nop', 'Nutrition Coach Dashboard'), ('Peem Nop', 'Trip Planner Community Feed'), ('Ploy Kittisak', 'Influencer Asset Portal'), ('Ploy Kittisak', 'Luxury Storefront Refresh'), ('Ploy Kittisak', 'Packaging Feedback Dashboard'), ('Sara Lim', 'Collections Workflow Automation'), ('Sara Lim', 'Disaster Recovery Drills'), ('Sara Lim', 'Driver Incident App API'), ('Sara Lim', 'Fleet Control Tower'), ('Sara Lim', 'Investor Report Generator'), ('Sara Lim', 'Warehouse K8s Migration'), ('Sara Lim', 'Zero Trust Rollout'), ('Tee Ratan', 'FinOps Savings Explorer'), ('Tee Ratan', 'Warehouse K8s Migration'), ('Tom Yu', 'Adaptive Quiz Engine'), ('Tom Yu', 'Affiliate Revenue Reporting'), ('Tom Yu', 'Creator Media Kit CMS'), ('Tom Yu', 'LMS Revamp'), ('Tom Yu', 'Trip Planner Community Feed'), ('Win Chaiyasit', 'Habit Challenge Engine'), ('Win Chaiyasit', 'Nutrition Coach Dashboard'), ('Win Chaiyasit', 'Telemedicine Booking Portal')]
+    Status: ✅ Success
+    Tokens: total=1615  input=1547  output=68
+------------------------------------------------------------
+
+[6] Q: งานแต่ละงานอยู่ในโปรเจกต์ใด และมีใครรับผิดชอบบ้าง
+    Retrieved: task_assignees, project_tasks, projects, project_members, time_entries
+    SQL:
+SELECT
+  pt.name AS task_name,
+  p.name AS project_name,
+  ta.user_id
+FROM project_tasks AS pt
+JOIN projects AS p
+  ON pt.project_id = p.id
+JOIN task_assignees AS ta
+  ON pt.id = ta.task_id;
+    Result: [('UI/UX Design', 'E-Commerce Platform Redesign', 'b1000000-0000-0000-0000-000000000006'), ('Frontend Development', 'E-Commerce Platform Redesign', 'b1000000-0000-0000-0000-000000000002'), ('API Integration', 'E-Commerce Platform Redesign', 'b1000000-0000-0000-0000-000000000002'), ('App Architecture', 'Mobile App MVP', 'b1000000-0000-0000-0000-000000000003'), ('Authentication Module', 'Mobile App MVP', 'b1000000-0000-0000-0000-000000000003'), ('Data Pipeline', 'Data Analytics Dashboard', 'b1000000-0000-0000-0000-000000000002'), ('Chart Components', 'Data Analytics Dashboard', 'b1000000-0000-0000-0000-000000000006'), ('Service Discovery Setup', 'Kubernetes Migration', 'b1000000-0000-0000-0000-000000000004'), ('Helm Charts', 'Kubernetes Migration', 'b1000000-0000-0000-0000-000000000005'), ('Security Scan', 'Infrastructure Audit', 'b1000000-0000-0000-0000-000000000004'), ('Discovery & Planning', 'Luxury Storefront Refresh', 'b4000000-0000-0000-0000-000000000001'), ('Discovery & Planning', 'Luxury Storefront Refresh', 'b4000000-0000-0000-0000-000000000003'), ('Implementation Sprint', 'Luxury Storefront Refresh', 'b4000000-0000-0000-0000-000000000001'), ('Implementation Sprint', 'Luxury Storefront Refresh', 'b4000000-0000-0000-0000-000000000004'), ('Implementation Sprint', 'Luxury Storefront Refresh', 'b4000000-0000-0000-0000-000000000003'), ('QA / Launch Support', 'Luxury Storefront Refresh', 'b4000000-0000-0000-0000-000000000001'), ('QA / Launch Support', 'Luxury Storefront Refresh', 'b4000000-0000-0000-0000-000000000003'), ('Discovery & Planning', 'Campaign Microsite Factory', 'b4000000-0000-0000-0000-000000000002'), ('Discovery & Planning', 'Campaign Microsite Factory', 'b4000000-0000-0000-0000-000000000005'), ('Discovery & Planning', 'Campaign Microsite Factory', 'b4000000-0000-0000-0000-000000000004'), ('Implementation Sprint', 'Campaign Microsite Factory', 'b4000000-0000-0000-0000-000000000002'), ('Implementation Sprint', 'Campaign Microsite Factory', 'b4000000-0000-0000-0000-000000000004'), ('QA / Launch Support', 'Campaign Microsite Factory', 'b4000000-0000-0000-0000-000000000002'), ('QA / Launch Support', 'Campaign Microsite Factory', 'b4000000-0000-0000-0000-000000000005'), ('QA / Launch Support', 'Campaign Microsite Factory', 'b4000000-0000-0000-0000-000000000004'), ('Discovery & Planning', 'Influencer Asset Portal', 'b4000000-0000-0000-0000-000000000001'), ('Discovery & Planning', 'Influencer Asset Portal', 'b4000000-0000-0000-0000-000000000003'), ('Implementation Sprint', 'Influencer Asset Portal', 'b4000000-0000-0000-0000-000000000001'), ('Implementation Sprint', 'Influencer Asset Portal', 'b4000000-0000-0000-0000-000000000004'), ('Implementation Sprint', 'Influencer Asset Portal', 'b4000000-0000-0000-0000-000000000003'), ('QA / Launch Support', 'Influencer Asset Portal', 'b4000000-0000-0000-0000-000000000001'), ('QA / Launch Support', 'Influencer Asset Portal', 'b4000000-0000-0000-0000-000000000003'), ('Discovery & Planning', 'Subscription Checkout Optimization', 'b4000000-0000-0000-0000-000000000002'), ('Discovery & Planning', 'Subscription Checkout Optimization', 'b4000000-0000-0000-0000-000000000004'), ('Implementation Sprint', 'Subscription Checkout Optimization', 'b4000000-0000-0000-0000-000000000002'), ('Implementation Sprint', 'Subscription Checkout Optimization', 'b4000000-0000-0000-0000-000000000004'), ('QA / Launch Support', 'Subscription Checkout Optimization', 'b4000000-0000-0000-0000-000000000002'), ('QA / Launch Support', 'Subscription Checkout Optimization', 'b4000000-0000-0000-0000-000000000004'), ('Discovery & Planning', 'Packaging Feedback Dashboard', 'b4000000-0000-0000-0000-000000000001'), ('Discovery & Planning', 'Packaging Feedback Dashboard', 'b4000000-0000-0000-0000-000000000003'), ('Implementation Sprint', 'Packaging Feedback Dashboard', 'b4000000-0000-0000-0000-000000000001'), ('Implementation Sprint', 'Packaging Feedback Dashboard', 'b4000000-0000-0000-0000-000000000005'), ('Implementation Sprint', 'Packaging Feedback Dashboard', 'b4000000-0000-0000-0000-000000000003'), ('QA / Launch Support', 'Packaging Feedback Dashboard', 'b4000000-0000-0000-0000-000000000001'), ('QA / Launch Support', 'Packaging Feedback Dashboard', 'b4000000-0000-0000-0000-000000000003'), ('Discovery & Planning', 'Franchise Location CMS', 'b4000000-0000-0000-0000-000000000002'), ('Discovery & Planning', 'Franchise Location CMS', 'b4000000-0000-0000-0000-000000000004'), ('Implementation Sprint', 'Franchise Location CMS', 'b4000000-0000-0000-0000-000000000002'), ('Implementation Sprint', 'Franchise Location CMS', 'b4000000-0000-0000-0000-000000000004'), ('QA / Launch Support', 'Franchise Location CMS', 'b4000000-0000-0000-0000-000000000002'), ('QA / Launch Support', 'Franchise Location CMS', 'b4000000-0000-0000-0000-000000000004'), ('Discovery & Planning', 'Fleet Control Tower', 'b4000000-0000-0000-0000-000000000006'), ('Discovery & Planning', 'Fleet Control Tower', 'b4000000-0000-0000-0000-000000000008'), ('Implementation Sprint', 'Fleet Control Tower', 'b4000000-0000-0000-0000-000000000006'), ('Implementation Sprint', 'Fleet Control Tower', 'b4000000-0000-0000-0000-000000000009'), ('Implementation Sprint', 'Fleet Control Tower', 'b4000000-0000-0000-0000-000000000008'), ('QA / Launch Support', 'Fleet Control Tower', 'b4000000-0000-0000-0000-000000000006'), ('QA / Launch Support', 'Fleet Control Tower', 'b4000000-0000-0000-0000-000000000008'), ('Discovery & Planning', 'Warehouse K8s Migration', 'b4000000-0000-0000-0000-000000000007'), ('Discovery & Planning', 'Warehouse K8s Migration', 'b4000000-0000-0000-0000-000000000010'), ('Discovery & Planning', 'Warehouse K8s Migration', 'b4000000-0000-0000-0000-000000000009'), ('Implementation Sprint', 'Warehouse K8s Migration', 'b4000000-0000-0000-0000-000000000007'), ('Implementation Sprint', 'Warehouse K8s Migration', 'b4000000-0000-0000-0000-000000000009'), ('QA / Launch Support', 'Warehouse K8s Migration', 'b4000000-0000-0000-0000-000000000007'), ('QA / Launch Support', 'Warehouse K8s Migration', 'b4000000-0000-0000-0000-000000000010'), ('QA / Launch Support', 'Warehouse K8s Migration', 'b4000000-0000-0000-0000-000000000009'), ('Discovery & Planning', 'Driver Incident App API', 'b4000000-0000-0000-0000-000000000006'), ('Discovery & Planning', 'Driver Incident App API', 'b4000000-0000-0000-0000-000000000008'), ('Implementation Sprint', 'Driver Incident App API', 'b4000000-0000-0000-0000-000000000006'), ('Implementation Sprint', 'Driver Incident App API', 'b4000000-0000-0000-0000-000000000009'), ('Implementation Sprint', 'Driver Incident App API', 'b4000000-0000-0000-0000-000000000008'), ('QA / Launch Support', 'Driver Incident App API', 'b4000000-0000-0000-0000-000000000006'), ('QA / Launch Support', 'Driver Incident App API', 'b4000000-0000-0000-0000-000000000008'), ('Discovery & Planning', 'Zero Trust Rollout', 'b4000000-0000-0000-0000-000000000007'), ('Discovery & Planning', 'Zero Trust Rollout', 'b4000000-0000-0000-0000-000000000009'), ('Implementation Sprint', 'Zero Trust Rollout', 'b4000000-0000-0000-0000-000000000007'), ('Implementation Sprint', 'Zero Trust Rollout', 'b4000000-0000-0000-0000-000000000009'), ('QA / Launch Support', 'Zero Trust Rollout', 'b4000000-0000-0000-0000-000000000007'), ('QA / Launch Support', 'Zero Trust Rollout', 'b4000000-0000-0000-0000-000000000009'), ('Discovery & Planning', 'FinOps Savings Explorer', 'b4000000-0000-0000-0000-000000000006'), ('Discovery & Planning', 'FinOps Savings Explorer', 'b4000000-0000-0000-0000-000000000008'), ('Implementation Sprint', 'FinOps Savings Explorer', 'b4000000-0000-0000-0000-000000000006'), ('Implementation Sprint', 'FinOps Savings Explorer', 'b4000000-0000-0000-0000-000000000010'), ('Implementation Sprint', 'FinOps Savings Explorer', 'b4000000-0000-0000-0000-000000000008'), ('QA / Launch Support', 'FinOps Savings Explorer', 'b4000000-0000-0000-0000-000000000006'), ('QA / Launch Support', 'FinOps Savings Explorer', 'b4000000-0000-0000-0000-000000000008'), ('Discovery & Planning', 'Disaster Recovery Drills', 'b4000000-0000-0000-0000-000000000007'), ('Discovery & Planning', 'Disaster Recovery Drills', 'b4000000-0000-0000-0000-000000000009'), ('Implementation Sprint', 'Disaster Recovery Drills', 'b4000000-0000-0000-0000-000000000007'), ('Implementation Sprint', 'Disaster Recovery Drills', 'b4000000-0000-0000-0000-000000000009'), ('QA / Launch Support', 'Disaster Recovery Drills', 'b4000000-0000-0000-0000-000000000007'), ('QA / Launch Support', 'Disaster Recovery Drills', 'b4000000-0000-0000-0000-000000000009'), ('Discovery & Planning', 'Patient App Revamp', 'b4000000-0000-0000-0000-000000000011'), ('Discovery & Planning', 'Patient App Revamp', 'b4000000-0000-0000-0000-000000000013'), ('Implementation Sprint', 'Patient App Revamp', 'b4000000-0000-0000-0000-000000000011'), ('Implementation Sprint', 'Patient App Revamp', 'b4000000-0000-0000-0000-000000000014'), ('Implementation Sprint', 'Patient App Revamp', 'b4000000-0000-0000-0000-000000000013'), ('QA / Launch Support', 'Patient App Revamp', 'b4000000-0000-0000-0000-000000000011'), ('QA / Launch Support', 'Patient App Revamp', 'b4000000-0000-0000-0000-000000000013'), ('Discovery & Planning', 'Telemedicine Booking Portal', 'b4000000-0000-0000-0000-000000000012'), ('Discovery & Planning', 'Telemedicine Booking Portal', 'b4000000-0000-0000-0000-000000000015'), ('Discovery & Planning', 'Telemedicine Booking Portal', 'b4000000-0000-0000-0000-000000000014'), ('Implementation Sprint', 'Telemedicine Booking Portal', 'b4000000-0000-0000-0000-000000000012'), ('Implementation Sprint', 'Telemedicine Booking Portal', 'b4000000-0000-0000-0000-000000000014'), ('QA / Launch Support', 'Telemedicine Booking Portal', 'b4000000-0000-0000-0000-000000000012'), ('QA / Launch Support', 'Telemedicine Booking Portal', 'b4000000-0000-0000-0000-000000000015'), ('QA / Launch Support', 'Telemedicine Booking Portal', 'b4000000-0000-0000-0000-000000000014'), ('Discovery & Planning', 'Insurance Claim Sync', 'b4000000-0000-0000-0000-000000000011'), ('Discovery & Planning', 'Insurance Claim Sync', 'b4000000-0000-0000-0000-000000000013'), ('Implementation Sprint', 'Insurance Claim Sync', 'b4000000-0000-0000-0000-000000000011'), ('Implementation Sprint', 'Insurance Claim Sync', 'b4000000-0000-0000-0000-000000000014'), ('Implementation Sprint', 'Insurance Claim Sync', 'b4000000-0000-0000-0000-000000000013'), ('QA / Launch Support', 'Insurance Claim Sync', 'b4000000-0000-0000-0000-000000000011'), ('QA / Launch Support', 'Insurance Claim Sync', 'b4000000-0000-0000-0000-000000000013'), ('Discovery & Planning', 'Nutrition Coach Dashboard', 'b4000000-0000-0000-0000-000000000012'), ('Discovery & Planning', 'Nutrition Coach Dashboard', 'b4000000-0000-0000-0000-000000000014'), ('Implementation Sprint', 'Nutrition Coach Dashboard', 'b4000000-0000-0000-0000-000000000012'), ('Implementation Sprint', 'Nutrition Coach Dashboard', 'b4000000-0000-0000-0000-000000000014'), ('QA / Launch Support', 'Nutrition Coach Dashboard', 'b4000000-0000-0000-0000-000000000012'), ('QA / Launch Support', 'Nutrition Coach Dashboard', 'b4000000-0000-0000-0000-000000000014'), ('Discovery & Planning', 'Wearable Data Sync', 'b4000000-0000-0000-0000-000000000011'), ('Discovery & Planning', 'Wearable Data Sync', 'b4000000-0000-0000-0000-000000000013'), ('Implementation Sprint', 'Wearable Data Sync', 'b4000000-0000-0000-0000-000000000011'), ('Implementation Sprint', 'Wearable Data Sync', 'b4000000-0000-0000-0000-000000000015'), ('Implementation Sprint', 'Wearable Data Sync', 'b4000000-0000-0000-0000-000000000013'), ('QA / Launch Support', 'Wearable Data Sync', 'b4000000-0000-0000-0000-000000000011'), ('QA / Launch Support', 'Wearable Data Sync', 'b4000000-0000-0000-0000-000000000013'), ('Discovery & Planning', 'Habit Challenge Engine', 'b4000000-0000-0000-0000-000000000012'), ('Discovery & Planning', 'Habit Challenge Engine', 'b4000000-0000-0000-0000-000000000014'), ('Implementation Sprint', 'Habit Challenge Engine', 'b4000000-0000-0000-0000-000000000012'), ('Implementation Sprint', 'Habit Challenge Engine', 'b4000000-0000-0000-0000-000000000014'), ('QA / Launch Support', 'Habit Challenge Engine', 'b4000000-0000-0000-0000-000000000012'), ('QA / Launch Support', 'Habit Challenge Engine', 'b4000000-0000-0000-0000-000000000014'), ('Discovery & Planning', 'Executive Risk Dashboard', 'b4000000-0000-0000-0000-000000000016'), ('Discovery & Planning', 'Executive Risk Dashboard', 'b4000000-0000-0000-0000-000000000018'), ('Implementation Sprint', 'Executive Risk Dashboard', 'b4000000-0000-0000-0000-000000000016'), ('Implementation Sprint', 'Executive Risk Dashboard', 'b4000000-0000-0000-0000-000000000019'), ('Implementation Sprint', 'Executive Risk Dashboard', 'b4000000-0000-0000-0000-000000000018'), ('QA / Launch Support', 'Executive Risk Dashboard', 'b4000000-0000-0000-0000-000000000016'), ('QA / Launch Support', 'Executive Risk Dashboard', 'b4000000-0000-0000-0000-000000000018'), ('Discovery & Planning', 'Collections Workflow Automation', 'b4000000-0000-0000-0000-000000000017'), ('Discovery & Planning', 'Collections Workflow Automation', 'b4000000-0000-0000-0000-000000000020'), ('Discovery & Planning', 'Collections Workflow Automation', 'b4000000-0000-0000-0000-000000000019'), ('Implementation Sprint', 'Collections Workflow Automation', 'b4000000-0000-0000-0000-000000000017'), ('Implementation Sprint', 'Collections Workflow Automation', 'b4000000-0000-0000-0000-000000000019'), ('QA / Launch Support', 'Collections Workflow Automation', 'b4000000-0000-0000-0000-000000000017'), ('QA / Launch Support', 'Collections Workflow Automation', 'b4000000-0000-0000-0000-000000000020'), ('QA / Launch Support', 'Collections Workflow Automation', 'b4000000-0000-0000-0000-000000000019'), ('Discovery & Planning', 'Loan Origination UI Refresh', 'b4000000-0000-0000-0000-000000000016'), ('Discovery & Planning', 'Loan Origination UI Refresh', 'b4000000-0000-0000-0000-000000000018'), ('Implementation Sprint', 'Loan Origination UI Refresh', 'b4000000-0000-0000-0000-000000000016'), ('Implementation Sprint', 'Loan Origination UI Refresh', 'b4000000-0000-0000-0000-000000000019'), ('Implementation Sprint', 'Loan Origination UI Refresh', 'b4000000-0000-0000-0000-000000000018'), ('QA / Launch Support', 'Loan Origination UI Refresh', 'b4000000-0000-0000-0000-000000000016'), ('QA / Launch Support', 'Loan Origination UI Refresh', 'b4000000-0000-0000-0000-000000000018'), ('Discovery & Planning', 'Valuation Model Workbench', 'b4000000-0000-0000-0000-000000000017'), ('Discovery & Planning', 'Valuation Model Workbench', 'b4000000-0000-0000-0000-000000000019'), ('Implementation Sprint', 'Valuation Model Workbench', 'b4000000-0000-0000-0000-000000000017'), ('Implementation Sprint', 'Valuation Model Workbench', 'b4000000-0000-0000-0000-000000000019'), ('QA / Launch Support', 'Valuation Model Workbench', 'b4000000-0000-0000-0000-000000000017'), ('QA / Launch Support', 'Valuation Model Workbench', 'b4000000-0000-0000-0000-000000000019'), ('Discovery & Planning', 'Broker Deal Tracker', 'b4000000-0000-0000-0000-000000000016'), ('Discovery & Planning', 'Broker Deal Tracker', 'b4000000-0000-0000-0000-000000000018'), ('Implementation Sprint', 'Broker Deal Tracker', 'b4000000-0000-0000-0000-000000000016'), ('Implementation Sprint', 'Broker Deal Tracker', 'b4000000-0000-0000-0000-000000000020'), ('Implementation Sprint', 'Broker Deal Tracker', 'b4000000-0000-0000-0000-000000000018'), ('QA / Launch Support', 'Broker Deal Tracker', 'b4000000-0000-0000-0000-000000000016'), ('QA / Launch Support', 'Broker Deal Tracker', 'b4000000-0000-0000-0000-000000000018'), ('Discovery & Planning', 'Investor Report Generator', 'b4000000-0000-0000-0000-000000000017'), ('Discovery & Planning', 'Investor Report Generator', 'b4000000-0000-0000-0000-000000000019'), ('Implementation Sprint', 'Investor Report Generator', 'b4000000-0000-0000-0000-000000000017'), ('Implementation Sprint', 'Investor Report Generator', 'b4000000-0000-0000-0000-000000000019'), ('QA / Launch Support', 'Investor Report Generator', 'b4000000-0000-0000-0000-000000000017'), ('QA / Launch Support', 'Investor Report Generator', 'b4000000-0000-0000-0000-000000000019'), ('Discovery & Planning', 'LMS Revamp', 'b4000000-0000-0000-0000-000000000021'), ('Discovery & Planning', 'LMS Revamp', 'b4000000-0000-0000-0000-000000000023'), ('Implementation Sprint', 'LMS Revamp', 'b4000000-0000-0000-0000-000000000021'), ('Implementation Sprint', 'LMS Revamp', 'b4000000-0000-0000-0000-000000000024'), ('Implementation Sprint', 'LMS Revamp', 'b4000000-0000-0000-0000-000000000023'), ('QA / Launch Support', 'LMS Revamp', 'b4000000-0000-0000-0000-000000000021'), ('QA / Launch Support', 'LMS Revamp', 'b4000000-0000-0000-0000-000000000023'), ('Discovery & Planning', 'Adaptive Quiz Engine', 'b4000000-0000-0000-0000-000000000022'), ('Discovery & Planning', 'Adaptive Quiz Engine', 'b4000000-0000-0000-0000-000000000024'), ('Implementation Sprint', 'Adaptive Quiz Engine', 'b4000000-0000-0000-0000-000000000022'), ('Implementation Sprint', 'Adaptive Quiz Engine', 'b4000000-0000-0000-0000-000000000024'), ('QA / Launch Support', 'Adaptive Quiz Engine', 'b4000000-0000-0000-0000-000000000022'), ('QA / Launch Support', 'Adaptive Quiz Engine', 'b4000000-0000-0000-0000-000000000024'), ('Discovery & Planning', 'Teacher Portal', 'b4000000-0000-0000-0000-000000000021'), ('Discovery & Planning', 'Teacher Portal', 'b4000000-0000-0000-0000-000000000023'), ('Implementation Sprint', 'Teacher Portal', 'b4000000-0000-0000-0000-000000000021'), ('Implementation Sprint', 'Teacher Portal', 'b4000000-0000-0000-0000-000000000023'), ('QA / Launch Support', 'Teacher Portal', 'b4000000-0000-0000-0000-000000000021'), ('QA / Launch Support', 'Teacher Portal', 'b4000000-0000-0000-0000-000000000023'), ('Discovery & Planning', 'Creator Media Kit CMS', 'b4000000-0000-0000-0000-000000000022'), ('Discovery & Planning', 'Creator Media Kit CMS', 'b4000000-0000-0000-0000-000000000024'), ('Implementation Sprint', 'Creator Media Kit CMS', 'b4000000-0000-0000-0000-000000000022'), ('Implementation Sprint', 'Creator Media Kit CMS', 'b4000000-0000-0000-0000-000000000024'), ('QA / Launch Support', 'Creator Media Kit CMS', 'b4000000-0000-0000-0000-000000000022'), ('QA / Launch Support', 'Creator Media Kit CMS', 'b4000000-0000-0000-0000-000000000024'), ('Discovery & Planning', 'Affiliate Revenue Reporting', 'b4000000-0000-0000-0000-000000000021'), ('Discovery & Planning', 'Affiliate Revenue Reporting', 'b4000000-0000-0000-0000-000000000023'), ('Implementation Sprint', 'Affiliate Revenue Reporting', 'b4000000-0000-0000-0000-000000000021'), ('Implementation Sprint', 'Affiliate Revenue Reporting', 'b4000000-0000-0000-0000-000000000024'), ('Implementation Sprint', 'Affiliate Revenue Reporting', 'b4000000-0000-0000-0000-000000000023'), ('QA / Launch Support', 'Affiliate Revenue Reporting', 'b4000000-0000-0000-0000-000000000021'), ('QA / Launch Support', 'Affiliate Revenue Reporting', 'b4000000-0000-0000-0000-000000000023'), ('Discovery & Planning', 'Trip Planner Community Feed', 'b4000000-0000-0000-0000-000000000022'), ('Discovery & Planning', 'Trip Planner Community Feed', 'b4000000-0000-0000-0000-000000000023'), ('Discovery & Planning', 'Trip Planner Community Feed', 'b4000000-0000-0000-0000-000000000024'), ('Implementation Sprint', 'Trip Planner Community Feed', 'b4000000-0000-0000-0000-000000000022'), ('Implementation Sprint', 'Trip Planner Community Feed', 'b4000000-0000-0000-0000-000000000024'), ('QA / Launch Support', 'Trip Planner Community Feed', 'b4000000-0000-0000-0000-000000000022'), ('QA / Launch Support', 'Trip Planner Community Feed', 'b4000000-0000-0000-0000-000000000023'), ('QA / Launch Support', 'Trip Planner Community Feed', 'b4000000-0000-0000-0000-000000000024')]
+    Status: ✅ Success
+    Tokens: total=1656  input=1583  output=73
+------------------------------------------------------------
+
+[7] Q: ใบแจ้งหนี้แต่ละใบเป็นของลูกค้ารายใดและอยู่ภายใต้ทีมใด
+    Retrieved: invoices, clients, teams, users, invoice_items
+    SQL:
+SELECT
+  i.invoice_number,
+  c.name AS client_name,
+  t.name AS team_name
+FROM
+  invoices AS i
+JOIN
+  clients AS c
+ON
+  i.client_id = c.id
+JOIN
+  teams AS t
+ON
+  i.team_id = t.id;
+    Result: [('INV-2025-001', 'TechStart Thailand', 'PixelCraft Studio'), ('INV-2025-002', 'MegaCorp Japan', 'PixelCraft Studio'), ('INV-2025-003', 'TechStart Thailand', 'PixelCraft Studio'), ('INV-2025-004', 'MegaCorp Japan', 'PixelCraft Studio'), ('INV-2025-005', 'CloudNine Singapore', 'DevOps Squad'), ('INV-2025-006', 'CloudNine Singapore', 'DevOps Squad'), ('BW-2025-001', 'Luna Fashion House', 'BrightWave Digital'), ('BW-2025-002', 'Luna Fashion House', 'BrightWave Digital'), ('BW-2025-003', 'GreenBite Foods', 'BrightWave Digital'), ('BW-2025-004', 'GreenBite Foods', 'BrightWave Digital'), ('AT-2025-005', 'NovaShip Logistics', 'Atlas Cloud Ops'), ('AT-2025-006', 'NovaShip Logistics', 'Atlas Cloud Ops'), ('AT-2025-007', 'SkyBank Infrastructure', 'Atlas Cloud Ops'), ('AT-2025-008', 'SkyBank Infrastructure', 'Atlas Cloud Ops'), ('MF-2025-009', 'VitaCare Clinic', 'MediFlow Product Lab'), ('MF-2025-010', 'VitaCare Clinic', 'MediFlow Product Lab'), ('MF-2025-011', 'FitSphere Wellness', 'MediFlow Product Lab'), ('MF-2025-012', 'FitSphere Wellness', 'MediFlow Product Lab'), ('LL-2025-013', 'CapitalBridge Finance', 'LedgerLeaf Analytics'), ('LL-2025-014', 'CapitalBridge Finance', 'LedgerLeaf Analytics'), ('LL-2025-015', 'PropSense Realty', 'LedgerLeaf Analytics'), ('LL-2025-016', 'PropSense Realty', 'LedgerLeaf Analytics'), ('AU-2025-017', 'LearnLoop Academy', 'Aurora Learning Studio'), ('AU-2025-018', 'LearnLoop Academy', 'Aurora Learning Studio'), ('AU-2025-019', 'TravelerJoy Media', 'Aurora Learning Studio'), ('AU-2025-020', 'TravelerJoy Media', 'Aurora Learning Studio')]
+    Status: ✅ Success
+    Tokens: total=1575  input=1498  output=77
+------------------------------------------------------------
+
+[8] Q: บันทึกเวลาทำงานแต่ละรายการเป็นของผู้ใช้คนใด ทำให้โปรเจกต์ใด และของลูกค้ารายใด
+    Retrieved: time_entries, project_members, clients, projects, invoice_items
+    SQL:
+SELECT
+  te.id,
+  te.user_id,
+  p.name AS project_name,
+  c.name AS client_name
+FROM time_entries AS te
+JOIN projects AS p
+  ON te.project_id = p.id
+JOIN clients AS c
+  ON te.client_id = c.id;
+    Result: [('c2000000-0000-0000-0000-000000000001', 'b1000000-0000-0000-0000-000000000002', 'E-Commerce Platform Redesign', 'TechStart Thailand'), ('c2000000-0000-0000-0000-000000000002', 'b1000000-0000-0000-0000-000000000006', 'E-Commerce Platform Redesign', 'TechStart Thailand'), ('c2000000-0000-0000-0000-000000000003', 'b1000000-0000-0000-0000-000000000006', 'E-Commerce Platform Redesign', 'TechStart Thailand'), ('c2000000-0000-0000-0000-000000000004', 'b1000000-0000-0000-0000-000000000002', 'E-Commerce Platform Redesign', 'TechStart Thailand'), ('c2000000-0000-0000-0000-000000000005', 'b1000000-0000-0000-0000-000000000002', 'E-Commerce Platform Redesign', 'TechStart Thailand'), ('c2000000-0000-0000-0000-000000000006', 'b1000000-0000-0000-0000-000000000001', 'E-Commerce Platform Redesign', 'TechStart Thailand'), ('c2000000-0000-0000-0000-000000000007', 'b1000000-0000-0000-0000-000000000003', 'Mobile App MVP', 'TechStart Thailand'), ('c2000000-0000-0000-0000-000000000008', 'b1000000-0000-0000-0000-000000000003', 'Mobile App MVP', 'TechStart Thailand'), ('c2000000-0000-0000-0000-000000000009', 'b1000000-0000-0000-0000-000000000003', 'Mobile App MVP', 'TechStart Thailand'), ('c2000000-0000-0000-0000-000000000010', 'b1000000-0000-0000-0000-000000000002', 'Enterprise CRM Integration', 'MegaCorp Japan'), ('c2000000-0000-0000-0000-000000000011', 'b1000000-0000-0000-0000-000000000003', 'Enterprise CRM Integration', 'MegaCorp Japan'), ('c2000000-0000-0000-0000-000000000012', 'b1000000-0000-0000-0000-000000000002', 'Enterprise CRM Integration', 'MegaCorp Japan'), ('c2000000-0000-0000-0000-000000000013', 'b1000000-0000-0000-0000-000000000002', 'Data Analytics Dashboard', 'MegaCorp Japan'), ('c2000000-0000-0000-0000-000000000014', 'b1000000-0000-0000-0000-000000000006', 'Data Analytics Dashboard', 'MegaCorp Japan'), ('c2000000-0000-0000-0000-000000000015', 'b1000000-0000-0000-0000-000000000004', 'Kubernetes Migration', 'CloudNine Singapore'), ('c2000000-0000-0000-0000-000000000016', 'b1000000-0000-0000-0000-000000000005', 'Kubernetes Migration', 'CloudNine Singapore'), ('c2000000-0000-0000-0000-000000000017', 'b1000000-0000-0000-0000-000000000004', 'Kubernetes Migration', 'CloudNine Singapore'), ('c2000000-0000-0000-0000-000000000018', 'b1000000-0000-0000-0000-000000000005', 'Kubernetes Migration', 'CloudNine Singapore'), ('c2000000-0000-0000-0000-000000000019', 'b1000000-0000-0000-0000-000000000004', 'Infrastructure Audit', 'StartupX Vietnam'), ('c2000000-0000-0000-0000-000000000020', 'b1000000-0000-0000-0000-000000000005', 'Infrastructure Audit', 'StartupX Vietnam'), ('c5000000-0000-0000-0000-000000000001', 'b4000000-0000-0000-0000-000000000003', 'Luxury Storefront Refresh', 'Luna Fashion House'), ('c5000000-0000-0000-0000-000000000002', 'b4000000-0000-0000-0000-000000000004', 'Luxury Storefront Refresh', 'Luna Fashion House'), ('c5000000-0000-0000-0000-000000000003', 'b4000000-0000-0000-0000-000000000001', 'Luxury Storefront Refresh', 'Luna Fashion House'), ('c5000000-0000-0000-0000-000000000004', 'b4000000-0000-0000-0000-000000000003', 'Luxury Storefront Refresh', 'Luna Fashion House'), ('c5000000-0000-0000-0000-000000000005', 'b4000000-0000-0000-0000-000000000004', 'Campaign Microsite Factory', 'Luna Fashion House'), ('c5000000-0000-0000-0000-000000000006', 'b4000000-0000-0000-0000-000000000005', 'Campaign Microsite Factory', 'Luna Fashion House'), ('c5000000-0000-0000-0000-000000000007', 'b4000000-0000-0000-0000-000000000002', 'Campaign Microsite Factory', 'Luna Fashion House'), ('c5000000-0000-0000-0000-000000000008', 'b4000000-0000-0000-0000-000000000004', 'Campaign Microsite Factory', 'Luna Fashion House'), ('c5000000-0000-0000-0000-000000000009', 'b4000000-0000-0000-0000-000000000003', 'Influencer Asset Portal', 'Luna Fashion House'), ('c5000000-0000-0000-0000-000000000010', 'b4000000-0000-0000-0000-000000000004', 'Influencer Asset Portal', 'Luna Fashion House'), ('c5000000-0000-0000-0000-000000000011', 'b4000000-0000-0000-0000-000000000001', 'Influencer Asset Portal', 'Luna Fashion House'), ('c5000000-0000-0000-0000-000000000012', 'b4000000-0000-0000-0000-000000000003', 'Influencer Asset Portal', 'Luna Fashion House'), ('c5000000-0000-0000-0000-000000000013', 'b4000000-0000-0000-0000-000000000004', 'Subscription Checkout Optimization', 'GreenBite Foods'), ('c5000000-0000-0000-0000-000000000014', 'b4000000-0000-0000-0000-000000000002', 'Subscription Checkout Optimization', 'GreenBite Foods'), ('c5000000-0000-0000-0000-000000000015', 'b4000000-0000-0000-0000-000000000004', 'Subscription Checkout Optimization', 'GreenBite Foods'), ('c5000000-0000-0000-0000-000000000016', 'b4000000-0000-0000-0000-000000000002', 'Subscription Checkout Optimization', 'GreenBite Foods'), ('c5000000-0000-0000-0000-000000000017', 'b4000000-0000-0000-0000-000000000003', 'Packaging Feedback Dashboard', 'GreenBite Foods'), ('c5000000-0000-0000-0000-000000000018', 'b4000000-0000-0000-0000-000000000005', 'Packaging Feedback Dashboard', 'GreenBite Foods'), ('c5000000-0000-0000-0000-000000000019', 'b4000000-0000-0000-0000-000000000001', 'Packaging Feedback Dashboard', 'GreenBite Foods'), ('c5000000-0000-0000-0000-000000000020', 'b4000000-0000-0000-0000-000000000003', 'Packaging Feedback Dashboard', 'GreenBite Foods'), ('c5000000-0000-0000-0000-000000000021', 'b4000000-0000-0000-0000-000000000004', 'Franchise Location CMS', 'GreenBite Foods'), ('c5000000-0000-0000-0000-000000000022', 'b4000000-0000-0000-0000-000000000002', 'Franchise Location CMS', 'GreenBite Foods'), ('c5000000-0000-0000-0000-000000000023', 'b4000000-0000-0000-0000-000000000004', 'Franchise Location CMS', 'GreenBite Foods'), ('c5000000-0000-0000-0000-000000000024', 'b4000000-0000-0000-0000-000000000002', 'Franchise Location CMS', 'GreenBite Foods'), ('c5000000-0000-0000-0000-000000000025', 'b4000000-0000-0000-0000-000000000008', 'Fleet Control Tower', 'NovaShip Logistics'), ('c5000000-0000-0000-0000-000000000026', 'b4000000-0000-0000-0000-000000000009', 'Fleet Control Tower', 'NovaShip Logistics'), ('c5000000-0000-0000-0000-000000000027', 'b4000000-0000-0000-0000-000000000006', 'Fleet Control Tower', 'NovaShip Logistics'), ('c5000000-0000-0000-0000-000000000028', 'b4000000-0000-0000-0000-000000000008', 'Fleet Control Tower', 'NovaShip Logistics'), ('c5000000-0000-0000-0000-000000000029', 'b4000000-0000-0000-0000-000000000009', 'Warehouse K8s Migration', 'NovaShip Logistics'), ('c5000000-0000-0000-0000-000000000030', 'b4000000-0000-0000-0000-000000000010', 'Warehouse K8s Migration', 'NovaShip Logistics'), ('c5000000-0000-0000-0000-000000000031', 'b4000000-0000-0000-0000-000000000007', 'Warehouse K8s Migration', 'NovaShip Logistics'), ('c5000000-0000-0000-0000-000000000032', 'b4000000-0000-0000-0000-000000000009', 'Warehouse K8s Migration', 'NovaShip Logistics'), ('c5000000-0000-0000-0000-000000000033', 'b4000000-0000-0000-0000-000000000008', 'Driver Incident App API', 'NovaShip Logistics'), ('c5000000-0000-0000-0000-000000000034', 'b4000000-0000-0000-0000-000000000009', 'Driver Incident App API', 'NovaShip Logistics'), ('c5000000-0000-0000-0000-000000000035', 'b4000000-0000-0000-0000-000000000006', 'Driver Incident App API', 'NovaShip Logistics'), ('c5000000-0000-0000-0000-000000000036', 'b4000000-0000-0000-0000-000000000008', 'Driver Incident App API', 'NovaShip Logistics'), ('c5000000-0000-0000-0000-000000000037', 'b4000000-0000-0000-0000-000000000009', 'Zero Trust Rollout', 'SkyBank Infrastructure'), ('c5000000-0000-0000-0000-000000000038', 'b4000000-0000-0000-0000-000000000007', 'Zero Trust Rollout', 'SkyBank Infrastructure'), ('c5000000-0000-0000-0000-000000000039', 'b4000000-0000-0000-0000-000000000009', 'Zero Trust Rollout', 'SkyBank Infrastructure'), ('c5000000-0000-0000-0000-000000000040', 'b4000000-0000-0000-0000-000000000007', 'Zero Trust Rollout', 'SkyBank Infrastructure'), ('c5000000-0000-0000-0000-000000000041', 'b4000000-0000-0000-0000-000000000008', 'FinOps Savings Explorer', 'SkyBank Infrastructure'), ('c5000000-0000-0000-0000-000000000042', 'b4000000-0000-0000-0000-000000000010', 'FinOps Savings Explorer', 'SkyBank Infrastructure'), ('c5000000-0000-0000-0000-000000000043', 'b4000000-0000-0000-0000-000000000006', 'FinOps Savings Explorer', 'SkyBank Infrastructure'), ('c5000000-0000-0000-0000-000000000044', 'b4000000-0000-0000-0000-000000000008', 'FinOps Savings Explorer', 'SkyBank Infrastructure'), ('c5000000-0000-0000-0000-000000000045', 'b4000000-0000-0000-0000-000000000009', 'Disaster Recovery Drills', 'SkyBank Infrastructure'), ('c5000000-0000-0000-0000-000000000046', 'b4000000-0000-0000-0000-000000000007', 'Disaster Recovery Drills', 'SkyBank Infrastructure'), ('c5000000-0000-0000-0000-000000000047', 'b4000000-0000-0000-0000-000000000009', 'Disaster Recovery Drills', 'SkyBank Infrastructure'), ('c5000000-0000-0000-0000-000000000048', 'b4000000-0000-0000-0000-000000000007', 'Disaster Recovery Drills', 'SkyBank Infrastructure'), ('c5000000-0000-0000-0000-000000000049', 'b4000000-0000-0000-0000-000000000013', 'Patient App Revamp', 'VitaCare Clinic'), ('c5000000-0000-0000-0000-000000000050', 'b4000000-0000-0000-0000-000000000014', 'Patient App Revamp', 'VitaCare Clinic'), ('c5000000-0000-0000-0000-000000000051', 'b4000000-0000-0000-0000-000000000011', 'Patient App Revamp', 'VitaCare Clinic'), ('c5000000-0000-0000-0000-000000000052', 'b4000000-0000-0000-0000-000000000013', 'Patient App Revamp', 'VitaCare Clinic'), ('c5000000-0000-0000-0000-000000000053', 'b4000000-0000-0000-0000-000000000014', 'Telemedicine Booking Portal', 'VitaCare Clinic'), ('c5000000-0000-0000-0000-000000000054', 'b4000000-0000-0000-0000-000000000015', 'Telemedicine Booking Portal', 'VitaCare Clinic'), ('c5000000-0000-0000-0000-000000000055', 'b4000000-0000-0000-0000-000000000012', 'Telemedicine Booking Portal', 'VitaCare Clinic'), ('c5000000-0000-0000-0000-000000000056', 'b4000000-0000-0000-0000-000000000014', 'Telemedicine Booking Portal', 'VitaCare Clinic'), ('c5000000-0000-0000-0000-000000000057', 'b4000000-0000-0000-0000-000000000013', 'Insurance Claim Sync', 'VitaCare Clinic'), ('c5000000-0000-0000-0000-000000000058', 'b4000000-0000-0000-0000-000000000014', 'Insurance Claim Sync', 'VitaCare Clinic'), ('c5000000-0000-0000-0000-000000000059', 'b4000000-0000-0000-0000-000000000011', 'Insurance Claim Sync', 'VitaCare Clinic'), ('c5000000-0000-0000-0000-000000000060', 'b4000000-0000-0000-0000-000000000013', 'Insurance Claim Sync', 'VitaCare Clinic'), ('c5000000-0000-0000-0000-000000000061', 'b4000000-0000-0000-0000-000000000014', 'Nutrition Coach Dashboard', 'FitSphere Wellness'), ('c5000000-0000-0000-0000-000000000062', 'b4000000-0000-0000-0000-000000000012', 'Nutrition Coach Dashboard', 'FitSphere Wellness'), ('c5000000-0000-0000-0000-000000000063', 'b4000000-0000-0000-0000-000000000014', 'Nutrition Coach Dashboard', 'FitSphere Wellness'), ('c5000000-0000-0000-0000-000000000064', 'b4000000-0000-0000-0000-000000000012', 'Nutrition Coach Dashboard', 'FitSphere Wellness'), ('c5000000-0000-0000-0000-000000000065', 'b4000000-0000-0000-0000-000000000013', 'Wearable Data Sync', 'FitSphere Wellness'), ('c5000000-0000-0000-0000-000000000066', 'b4000000-0000-0000-0000-000000000015', 'Wearable Data Sync', 'FitSphere Wellness'), ('c5000000-0000-0000-0000-000000000067', 'b4000000-0000-0000-0000-000000000011', 'Wearable Data Sync', 'FitSphere Wellness'), ('c5000000-0000-0000-0000-000000000068', 'b4000000-0000-0000-0000-000000000013', 'Wearable Data Sync', 'FitSphere Wellness'), ('c5000000-0000-0000-0000-000000000069', 'b4000000-0000-0000-0000-000000000014', 'Habit Challenge Engine', 'FitSphere Wellness'), ('c5000000-0000-0000-0000-000000000070', 'b4000000-0000-0000-0000-000000000012', 'Habit Challenge Engine', 'FitSphere Wellness'), ('c5000000-0000-0000-0000-000000000071', 'b4000000-0000-0000-0000-000000000014', 'Habit Challenge Engine', 'FitSphere Wellness'), ('c5000000-0000-0000-0000-000000000072', 'b4000000-0000-0000-0000-000000000012', 'Habit Challenge Engine', 'FitSphere Wellness'), ('c5000000-0000-0000-0000-000000000073', 'b4000000-0000-0000-0000-000000000018', 'Executive Risk Dashboard', 'CapitalBridge Finance'), ('c5000000-0000-0000-0000-000000000074', 'b4000000-0000-0000-0000-000000000019', 'Executive Risk Dashboard', 'CapitalBridge Finance'), ('c5000000-0000-0000-0000-000000000075', 'b4000000-0000-0000-0000-000000000016', 'Executive Risk Dashboard', 'CapitalBridge Finance'), ('c5000000-0000-0000-0000-000000000076', 'b4000000-0000-0000-0000-000000000018', 'Executive Risk Dashboard', 'CapitalBridge Finance'), ('c5000000-0000-0000-0000-000000000077', 'b4000000-0000-0000-0000-000000000019', 'Collections Workflow Automation', 'CapitalBridge Finance'), ('c5000000-0000-0000-0000-000000000078', 'b4000000-0000-0000-0000-000000000020', 'Collections Workflow Automation', 'CapitalBridge Finance'), ('c5000000-0000-0000-0000-000000000079', 'b4000000-0000-0000-0000-000000000017', 'Collections Workflow Automation', 'CapitalBridge Finance'), ('c5000000-0000-0000-0000-000000000080', 'b4000000-0000-0000-0000-000000000019', 'Collections Workflow Automation', 'CapitalBridge Finance'), ('c5000000-0000-0000-0000-000000000081', 'b4000000-0000-0000-0000-000000000018', 'Loan Origination UI Refresh', 'CapitalBridge Finance'), ('c5000000-0000-0000-0000-000000000082', 'b4000000-0000-0000-0000-000000000019', 'Loan Origination UI Refresh', 'CapitalBridge Finance'), ('c5000000-0000-0000-0000-000000000083', 'b4000000-0000-0000-0000-000000000016', 'Loan Origination UI Refresh', 'CapitalBridge Finance'), ('c5000000-0000-0000-0000-000000000084', 'b4000000-0000-0000-0000-000000000018', 'Loan Origination UI Refresh', 'CapitalBridge Finance'), ('c5000000-0000-0000-0000-000000000085', 'b4000000-0000-0000-0000-000000000019', 'Valuation Model Workbench', 'PropSense Realty'), ('c5000000-0000-0000-0000-000000000086', 'b4000000-0000-0000-0000-000000000017', 'Valuation Model Workbench', 'PropSense Realty'), ('c5000000-0000-0000-0000-000000000087', 'b4000000-0000-0000-0000-000000000019', 'Valuation Model Workbench', 'PropSense Realty'), ('c5000000-0000-0000-0000-000000000088', 'b4000000-0000-0000-0000-000000000017', 'Valuation Model Workbench', 'PropSense Realty'), ('c5000000-0000-0000-0000-000000000089', 'b4000000-0000-0000-0000-000000000018', 'Broker Deal Tracker', 'PropSense Realty'), ('c5000000-0000-0000-0000-000000000090', 'b4000000-0000-0000-0000-000000000020', 'Broker Deal Tracker', 'PropSense Realty'), ('c5000000-0000-0000-0000-000000000091', 'b4000000-0000-0000-0000-000000000016', 'Broker Deal Tracker', 'PropSense Realty'), ('c5000000-0000-0000-0000-000000000092', 'b4000000-0000-0000-0000-000000000018', 'Broker Deal Tracker', 'PropSense Realty'), ('c5000000-0000-0000-0000-000000000093', 'b4000000-0000-0000-0000-000000000019', 'Investor Report Generator', 'PropSense Realty'), ('c5000000-0000-0000-0000-000000000094', 'b4000000-0000-0000-0000-000000000017', 'Investor Report Generator', 'PropSense Realty'), ('c5000000-0000-0000-0000-000000000095', 'b4000000-0000-0000-0000-000000000019', 'Investor Report Generator', 'PropSense Realty'), ('c5000000-0000-0000-0000-000000000096', 'b4000000-0000-0000-0000-000000000017', 'Investor Report Generator', 'PropSense Realty'), ('c5000000-0000-0000-0000-000000000097', 'b4000000-0000-0000-0000-000000000023', 'LMS Revamp', 'LearnLoop Academy'), ('c5000000-0000-0000-0000-000000000098', 'b4000000-0000-0000-0000-000000000024', 'LMS Revamp', 'LearnLoop Academy'), ('c5000000-0000-0000-0000-000000000099', 'b4000000-0000-0000-0000-000000000021', 'LMS Revamp', 'LearnLoop Academy'), ('c5000000-0000-0000-0000-000000000100', 'b4000000-0000-0000-0000-000000000023', 'LMS Revamp', 'LearnLoop Academy'), ('c5000000-0000-0000-0000-000000000101', 'b4000000-0000-0000-0000-000000000024', 'Adaptive Quiz Engine', 'LearnLoop Academy'), ('c5000000-0000-0000-0000-000000000102', 'b4000000-0000-0000-0000-000000000022', 'Adaptive Quiz Engine', 'LearnLoop Academy'), ('c5000000-0000-0000-0000-000000000103', 'b4000000-0000-0000-0000-000000000024', 'Adaptive Quiz Engine', 'LearnLoop Academy'), ('c5000000-0000-0000-0000-000000000104', 'b4000000-0000-0000-0000-000000000022', 'Adaptive Quiz Engine', 'LearnLoop Academy'), ('c5000000-0000-0000-0000-000000000105', 'b4000000-0000-0000-0000-000000000023', 'Teacher Portal', 'LearnLoop Academy'), ('c5000000-0000-0000-0000-000000000106', 'b4000000-0000-0000-0000-000000000021', 'Teacher Portal', 'LearnLoop Academy'), ('c5000000-0000-0000-0000-000000000107', 'b4000000-0000-0000-0000-000000000023', 'Teacher Portal', 'LearnLoop Academy'), ('c5000000-0000-0000-0000-000000000108', 'b4000000-0000-0000-0000-000000000021', 'Teacher Portal', 'LearnLoop Academy'), ('c5000000-0000-0000-0000-000000000109', 'b4000000-0000-0000-0000-000000000024', 'Creator Media Kit CMS', 'TravelerJoy Media'), ('c5000000-0000-0000-0000-000000000110', 'b4000000-0000-0000-0000-000000000022', 'Creator Media Kit CMS', 'TravelerJoy Media'), ('c5000000-0000-0000-0000-000000000111', 'b4000000-0000-0000-0000-000000000024', 'Creator Media Kit CMS', 'TravelerJoy Media'), ('c5000000-0000-0000-0000-000000000112', 'b4000000-0000-0000-0000-000000000022', 'Creator Media Kit CMS', 'TravelerJoy Media'), ('c5000000-0000-0000-0000-000000000113', 'b4000000-0000-0000-0000-000000000023', 'Affiliate Revenue Reporting', 'TravelerJoy Media'), ('c5000000-0000-0000-0000-000000000114', 'b4000000-0000-0000-0000-000000000024', 'Affiliate Revenue Reporting', 'TravelerJoy Media'), ('c5000000-0000-0000-0000-000000000115', 'b4000000-0000-0000-0000-000000000021', 'Affiliate Revenue Reporting', 'TravelerJoy Media'), ('c5000000-0000-0000-0000-000000000116', 'b4000000-0000-0000-0000-000000000023', 'Affiliate Revenue Reporting', 'TravelerJoy Media'), ('c5000000-0000-0000-0000-000000000117', 'b4000000-0000-0000-0000-000000000024', 'Trip Planner Community Feed', 'TravelerJoy Media'), ('c5000000-0000-0000-0000-000000000118', 'b4000000-0000-0000-0000-000000000023', 'Trip Planner Community Feed', 'TravelerJoy Media'), ('c5000000-0000-0000-0000-000000000119', 'b4000000-0000-0000-0000-000000000022', 'Trip Planner Community Feed', 'TravelerJoy Media'), ('c5000000-0000-0000-0000-000000000120', 'b4000000-0000-0000-0000-000000000024', 'Trip Planner Community Feed', 'TravelerJoy Media')]
+    Status: ✅ Success
+    Tokens: total=1802  input=1726  output=76
+------------------------------------------------------------
+
+[9] Q: คำเชิญเข้าทีมแต่ละรายการเป็นของทีมใด และเชิญให้รับบทบาทอะไร
+    Retrieved: invites, team_membership, teams, project_members, task_assignees
+    SQL:
+SELECT
+  i.id,
+  t.name AS team_name,
+  i.role
+FROM invites AS i
+JOIN teams AS t
+  ON i.team_id = t.id;
+    Result: [('a3000000-0000-0000-0000-000000000001', 'PixelCraft Studio', 'MEMBER'), ('a3000000-0000-0000-0000-000000000002', 'PixelCraft Studio', 'MEMBER'), ('a3000000-0000-0000-0000-000000000003', 'PixelCraft Studio', 'BILLING'), ('a3000000-0000-0000-0000-000000000004', 'PixelCraft Studio', 'MEMBER'), ('a3000000-0000-0000-0000-000000000005', 'DevOps Squad', 'MEMBER'), ('a3000000-0000-0000-0000-000000000006', 'DevOps Squad', 'VIEWER'), ('a3000000-0000-0000-0000-000000000007', 'DevOps Squad', 'MEMBER'), ('a6000000-0000-0000-0000-000000000001', 'BrightWave Digital', 'MEMBER'), ('a6000000-0000-0000-0000-000000000002', 'BrightWave Digital', 'VIEWER'), ('a6000000-0000-0000-0000-000000000003', 'Atlas Cloud Ops', 'MEMBER'), ('a6000000-0000-0000-0000-000000000004', 'Atlas Cloud Ops', 'VIEWER'), ('a6000000-0000-0000-0000-000000000005', 'MediFlow Product Lab', 'MEMBER'), ('a6000000-0000-0000-0000-000000000006', 'MediFlow Product Lab', 'VIEWER'), ('a6000000-0000-0000-0000-000000000007', 'LedgerLeaf Analytics', 'MEMBER'), ('a6000000-0000-0000-0000-000000000008', 'LedgerLeaf Analytics', 'VIEWER'), ('a6000000-0000-0000-0000-000000000009', 'Aurora Learning Studio', 'MEMBER'), ('a6000000-0000-0000-0000-000000000010', 'Aurora Learning Studio', 'VIEWER')]
+    Status: ✅ Success
+    Tokens: total=1171  input=1126  output=45
+------------------------------------------------------------
+
+[10] Q: ลูกค้าแต่ละรายมีใบแจ้งหนี้ทั้งหมดกี่ใบ
+    Retrieved: invoices, clients, users, invoice_items, projects
+    SQL:
+SELECT
+  c.name,
+  COUNT(i.id) AS total_invoices
+FROM clients AS c
+LEFT JOIN invoices AS i
+  ON c.id = i.client_id
+GROUP BY
+  c.name
+ORDER BY
+  c.name;
+    Result: [('CapitalBridge Finance', 2), ('CloudNine Singapore', 2), ('FitSphere Wellness', 2), ('GreenBite Foods', 2), ('LearnLoop Academy', 2), ('Luna Fashion House', 2), ('MegaCorp Japan', 2), ('NovaShip Logistics', 2), ('OldSchool Corp', 0), ('PropSense Realty', 2), ('SkyBank Infrastructure', 2), ('StartupX Vietnam', 0), ('TechStart Thailand', 2), ('TravelerJoy Media', 2), ('VitaCare Clinic', 2), ('Worada Sarakhon', 0)]
+    Status: ✅ Success
+    Tokens: total=1791  input=1731  output=60
+------------------------------------------------------------
+
+[11] Q: แต่ละทีมมีสมาชิกทั้งหมดกี่คน
+    Retrieved: team_membership, teams, users, project_members, invites
+    SQL:
+SELECT
+  t.name,
+  COUNT(tm.user_id) AS total_members
+FROM teams AS t
+JOIN team_memberships AS tm
+  ON t.id = tm.team_id
+GROUP BY
+  t.id,
+  t.name
+ORDER BY
+  t.name;
+    Result: [('Atlas Cloud Ops', 6), ('Aurora Learning Studio', 5), ('BrightWave Digital', 6), ('DevOps Squad', 3), ('LedgerLeaf Analytics', 6), ('MediFlow Product Lab', 6), ('PixelCraft Studio', 5), ('Worada Sarakhon', 1)]
+    Status: ✅ Success
+    Tokens: total=1275  input=1206  output=69
+------------------------------------------------------------
+
+[12] Q: ลูกค้าแต่ละรายมีโปรเจกต์ทั้งหมดกี่อัน
+    Retrieved: projects, project_members, clients, task_assignees, teams
+    SQL:
+SELECT
+  c.name,
+  COUNT(p.id) AS project_count
+FROM clients AS c
+LEFT JOIN projects AS p
+  ON c.id = p.client_id
+GROUP BY
+  c.name;
+    Result: [('Luna Fashion House', 3), ('OldSchool Corp', 1), ('TravelerJoy Media', 3), ('VitaCare Clinic', 3), ('Worada Sarakhon', 0), ('LearnLoop Academy', 3), ('GreenBite Foods', 3), ('StartupX Vietnam', 1), ('CapitalBridge Finance', 3), ('PropSense Realty', 3), ('CloudNine Singapore', 2), ('NovaShip Logistics', 3), ('FitSphere Wellness', 3), ('MegaCorp Japan', 2), ('SkyBank Infrastructure', 3), ('TechStart Thailand', 2)]
+    Status: ✅ Success
+    Tokens: total=1457  input=1406  output=51
+------------------------------------------------------------
+
+[13] Q: โปรเจกต์ใดมีงานย่อยมากที่สุด
+    Retrieved: projects, project_tasks, task_assignees, project_members, time_entries
+    SQL:
+SELECT
+  p.name
+FROM projects AS p
+JOIN project_tasks AS pt
+  ON p.id = pt.project_id
+GROUP BY
+  p.id,
+  p.name
+ORDER BY
+  COUNT(pt.id) DESC
+LIMIT 1
+    Result: [('E-Commerce Platform Redesign',)]
+    Status: ✅ Success
+    Tokens: total=1638  input=1578  output=60
+------------------------------------------------------------
+
+[14] Q: ผู้ใช้คนใดได้รับมอบหมายงานมากที่สุด
+    Retrieved: task_assignees, users, projects, project_members, invites
+    SQL:
+SELECT
+  u.name
+FROM task_assignees AS ta
+JOIN users AS u
+  ON ta.user_id = u.id
+GROUP BY
+  u.id,
+  u.name
+ORDER BY
+  COUNT(ta.id) DESC
+LIMIT 1;
+    Result: [('Sara Lim',)]
+    Status: ✅ Success
+    Tokens: total=1450  input=1388  output=62
+------------------------------------------------------------
+
+[15] Q: ผู้ใช้คนใดมีเวลางานรวมสูงที่สุด
+    Retrieved: time_entries, task_assignees, users, projects, project_tasks
+    SQL:
+SELECT
+  u.name
+FROM time_entries AS te
+JOIN users AS u
+  ON te.user_id = u.id
+GROUP BY
+  u.name
+ORDER BY
+  SUM(te.duration_seconds) DESC
+LIMIT 1;
+    Result: [('Bob Srisuk',)]
+    Status: ✅ Success
+    Tokens: total=1662  input=1605  output=57
+------------------------------------------------------------
+
+[16] Q: ทีมใดมีชั่วโมงงานที่คิดเงินได้รวมมากที่สุด
+    Retrieved: invoice_items, projects, time_entries, project_tasks, clients
+    SQL:
+SELECT
+  t.team_id
+FROM
+  time_entries AS t
+WHERE
+  t.billable = TRUE
+GROUP BY
+  t.team_id
+ORDER BY
+  SUM(t.duration_seconds) DESC
+LIMIT 1
+    Result: [('a1000000-0000-0000-0000-000000000001',)]
+    Status: ✅ Success
+    Tokens: total=1827  input=1772  output=55
+------------------------------------------------------------
+
+[17] Q: ใบแจ้งหนี้ใดบ้างที่เลยกำหนดชำระแล้วยังไม่ได้จ่าย
+    Retrieved: invoices, clients, invoice_items, invoice_time_entries, projects
+    SQL:
+SELECT
+  id,
+  invoice_number,
+  issued_date,
+  due_date,
+  total_cents
+FROM invoices
+WHERE
+  status = 'sent' AND due_date < CURRENT_DATE;
+    Result: [('d2000000-0000-0000-0000-000000000003', 'INV-2025-003', datetime.date(2025, 3, 1), datetime.date(2025, 3, 31), 240750), ('d2000000-0000-0000-0000-000000000006', 'INV-2025-006', datetime.date(2025, 3, 15), datetime.date(2025, 4, 14), 463250), ('d5000000-0000-0000-0000-000000000002', 'BW-2025-002', datetime.date(2025, 2, 19), datetime.date(2025, 3, 12), 110745), ('d5000000-0000-0000-0000-000000000006', 'AT-2025-006', datetime.date(2025, 3, 15), datetime.date(2025, 4, 5), 185028), ('d5000000-0000-0000-0000-000000000010', 'MF-2025-010', datetime.date(2025, 4, 8), datetime.date(2025, 4, 29), 132948), ('d5000000-0000-0000-0000-000000000014', 'LL-2025-014', datetime.date(2025, 5, 2), datetime.date(2025, 5, 23), 160768)]
+    Status: ✅ Success
+    Tokens: total=1708  input=1659  output=49
+------------------------------------------------------------
+
+[18] Q: คำเชิญเข้าทีมใดบ้างที่หมดอายุแล้วแต่ยังไม่ได้ตอบรับ
+    Retrieved: invites, team_membership, project_members, clients, teams
+    SQL:
+SELECT
+  id,
+  team_id,
+  email,
+  role,
+  token,
+  expires_at,
+  accepted_at,
+  created_at
+FROM invites
+WHERE
+  expires_at < NOW() AND accepted_at IS NULL;
+    Result: [('a3000000-0000-0000-0000-000000000002', 'a1000000-0000-0000-0000-000000000001', 'henry.pm@outlook.com', 'MEMBER', 'tok_pixelcraft_henry_xyz789ghi012', datetime.datetime(2026, 4, 21, 9, 11, 43, 657015, tzinfo=datetime.timezone.utc), None, datetime.datetime(2026, 4, 14, 9, 11, 43, 657015, tzinfo=datetime.timezone.utc)), ('a3000000-0000-0000-0000-000000000006', 'a1000000-0000-0000-0000-000000000002', 'raj.patel@cloudnine.sg', 'VIEWER', 'tok_devops_raj_bcd123efg456', datetime.datetime(2026, 4, 9, 9, 11, 43, 657015, tzinfo=datetime.timezone.utc), None, datetime.datetime(2026, 4, 2, 9, 11, 43, 657015, tzinfo=datetime.timezone.utc)), ('a6000000-0000-0000-0000-000000000002', 'a4000000-0000-0000-0000-000000000001', 'invite12@consultmix.io', 'VIEWER', 'tok_bw_002_invite12', datetime.datetime(2026, 4, 19, 10, 14, 8, 430867, tzinfo=datetime.timezone.utc), None, datetime.datetime(2026, 4, 15, 10, 14, 8, 430867, tzinfo=datetime.timezone.utc)), ('a6000000-0000-0000-0000-000000000004', 'a4000000-0000-0000-0000-000000000002', 'invite22@talentgrid.co', 'VIEWER', 'tok_at_004_invite22', datetime.datetime(2026, 4, 18, 10, 14, 8, 430867, tzinfo=datetime.timezone.utc), None, datetime.datetime(2026, 4, 13, 10, 14, 8, 430867, tzinfo=datetime.timezone.utc)), ('a6000000-0000-0000-0000-000000000006', 'a4000000-0000-0000-0000-000000000003', 'invite32@studioflow.app', 'VIEWER', 'tok_mf_006_invite32', datetime.datetime(2026, 4, 17, 10, 14, 8, 430867, tzinfo=datetime.timezone.utc), None, datetime.datetime(2026, 4, 11, 10, 14, 8, 430867, tzinfo=datetime.timezone.utc)), ('a6000000-0000-0000-0000-000000000008', 'a4000000-0000-0000-0000-000000000004', 'invite42@clientview.net', 'VIEWER', 'tok_ll_008_invite42', datetime.datetime(2026, 4, 16, 10, 14, 8, 430867, tzinfo=datetime.timezone.utc), None, datetime.datetime(2026, 4, 9, 10, 14, 8, 430867, tzinfo=datetime.timezone.utc)), ('a6000000-0000-0000-0000-000000000010', 'a4000000-0000-0000-0000-000000000005', 'invite52@freelancehub.dev', 'VIEWER', 'tok_au_010_invite52', datetime.datetime(2026, 4, 15, 10, 14, 8, 430867, tzinfo=datetime.timezone.utc), None, datetime.datetime(2026, 4, 7, 10, 14, 8, 430867, tzinfo=datetime.timezone.utc))]
+    Status: ✅ Success
+    Tokens: total=1346  input=1286  output=60
+------------------------------------------------------------
+
+[19] Q: บันทึกเวลารายการใดบ้างที่ยังไม่ถูกนำไปออกบิล
+    Retrieved: clients, time_entries, invoice_time_entries, invoice_items, invoices
+    SQL:
+SELECT
+  te.id,
+  te.team_id,
+  te.project_id,
+  te.task_id,
+  te.user_id,
+  te.client_id,
+  te.note,
+  te.started_at,
+  te.stopped_at,
+  te.duration_seconds,
+  te.billable,
+  te.hourly_rate_cents,
+  te.amount_cents
+FROM time_entries AS te
+WHERE
+  NOT EXISTS(
+    SELECT
+      1
+    FROM
+      invoice_time_entries AS ite
+    WHERE
+      ite.time_entry_id = te.id
+  );
+    Result: [('c2000000-0000-0000-0000-000000000006', 'a1000000-0000-0000-0000-000000000001', 'e1000000-0000-0000-0000-000000000001', 'a2000000-0000-0000-0000-000000000004', 'b1000000-0000-0000-0000-000000000001', 'd1000000-0000-0000-0000-000000000001', 'Weekly sprint planning', datetime.datetime(2026, 3, 16, 19, 1, 28, 111780, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 16, 21, 1, 28, 111780, tzinfo=datetime.timezone.utc), 7200, False, None, None), ('c2000000-0000-0000-0000-000000000019', 'a1000000-0000-0000-0000-000000000002', 'e1000000-0000-0000-0000-000000000008', 'a2000000-0000-0000-0000-000000000013', 'b1000000-0000-0000-0000-000000000004', 'd1000000-0000-0000-0000-000000000005', 'AWS Security Hub findings review', datetime.datetime(2026, 4, 15, 19, 1, 28, 111780, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 4, 16, 1, 1, 28, 111780, tzinfo=datetime.timezone.utc), 21600, True, 12000, 72000), ('c2000000-0000-0000-0000-000000000020', 'a1000000-0000-0000-0000-000000000002', 'e1000000-0000-0000-0000-000000000008', 'a2000000-0000-0000-0000-000000000014', 'b1000000-0000-0000-0000-000000000005', 'd1000000-0000-0000-0000-000000000005', 'Draft audit report', datetime.datetime(2026, 4, 18, 19, 1, 28, 111780, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 4, 18, 23, 1, 28, 111780, tzinfo=datetime.timezone.utc), 14400, False, None, None), ('c5000000-0000-0000-0000-000000000003', 'a4000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000001', 'a5000000-0000-0000-0000-000000000003', 'b4000000-0000-0000-0000-000000000001', 'd4000000-0000-0000-0000-000000000001', 'QA pass and issue triage — Luxury Storefront Refresh', datetime.datetime(2026, 2, 7, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 8, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000004', 'a4000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000001', 'a5000000-0000-0000-0000-000000000003', 'b4000000-0000-0000-0000-000000000003', 'd4000000-0000-0000-0000-000000000001', 'Release readiness checks — Luxury Storefront Refresh', datetime.datetime(2026, 2, 14, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 14, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000006', 'a4000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000002', 'a5000000-0000-0000-0000-000000000005', 'b4000000-0000-0000-0000-000000000005', 'd4000000-0000-0000-0000-000000000001', 'Core implementation workstream — Campaign Microsite Factory', datetime.datetime(2026, 2, 2, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 3, 1, 14, 8, 430867, tzinfo=datetime.timezone.utc), 14400, True, 16000, 64000), ('c5000000-0000-0000-0000-000000000007', 'a4000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000002', 'a5000000-0000-0000-0000-000000000006', 'b4000000-0000-0000-0000-000000000002', 'd4000000-0000-0000-0000-000000000001', 'Release readiness checks — Campaign Microsite Factory', datetime.datetime(2026, 2, 9, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 10, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000008', 'a4000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000002', 'a5000000-0000-0000-0000-000000000006', 'b4000000-0000-0000-0000-000000000004', 'd4000000-0000-0000-0000-000000000001', 'Launch support and bug review — Campaign Microsite Factory', datetime.datetime(2026, 2, 16, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 16, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000010', 'a4000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000003', 'a5000000-0000-0000-0000-000000000008', 'b4000000-0000-0000-0000-000000000004', 'd4000000-0000-0000-0000-000000000001', 'Feature development and iteration — Influencer Asset Portal', datetime.datetime(2026, 2, 4, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 5, 1, 14, 8, 430867, tzinfo=datetime.timezone.utc), 14400, True, 15500, 62000), ('c5000000-0000-0000-0000-000000000011', 'a4000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000003', 'a5000000-0000-0000-0000-000000000009', 'b4000000-0000-0000-0000-000000000001', 'd4000000-0000-0000-0000-000000000001', 'Launch support and bug review — Influencer Asset Portal', datetime.datetime(2026, 2, 11, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 12, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000012', 'a4000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000003', 'a5000000-0000-0000-0000-000000000009', 'b4000000-0000-0000-0000-000000000003', 'd4000000-0000-0000-0000-000000000001', 'Post-launch support retrospective for Influencer Asset Portal', datetime.datetime(2026, 2, 18, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 18, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000015', 'a4000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000004', 'a5000000-0000-0000-0000-000000000012', 'b4000000-0000-0000-0000-000000000004', 'd4000000-0000-0000-0000-000000000002', 'QA pass and issue triage — Subscription Checkout Optimization', datetime.datetime(2026, 2, 13, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 14, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000016', 'a4000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000004', 'a5000000-0000-0000-0000-000000000012', 'b4000000-0000-0000-0000-000000000002', 'd4000000-0000-0000-0000-000000000002', 'Release readiness checks — Subscription Checkout Optimization', datetime.datetime(2026, 2, 20, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 20, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000018', 'a4000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000005', 'a5000000-0000-0000-0000-000000000014', 'b4000000-0000-0000-0000-000000000005', 'd4000000-0000-0000-0000-000000000002', 'Core implementation workstream — Packaging Feedback Dashboard', datetime.datetime(2026, 2, 8, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 9, 1, 14, 8, 430867, tzinfo=datetime.timezone.utc), 14400, True, 14500, 58000), ('c5000000-0000-0000-0000-000000000019', 'a4000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000005', 'a5000000-0000-0000-0000-000000000015', 'b4000000-0000-0000-0000-000000000001', 'd4000000-0000-0000-0000-000000000002', 'Paused coordination for on-hold project Packaging Feedback Dashboard', datetime.datetime(2026, 2, 15, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 16, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000020', 'a4000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000005', None, 'b4000000-0000-0000-0000-000000000003', 'd4000000-0000-0000-0000-000000000002', 'Paused coordination for on-hold project Packaging Feedback Dashboard', datetime.datetime(2026, 2, 22, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 22, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000022', 'a4000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000006', 'a5000000-0000-0000-0000-000000000017', 'b4000000-0000-0000-0000-000000000002', 'd4000000-0000-0000-0000-000000000002', 'Feature development and iteration — Franchise Location CMS', datetime.datetime(2026, 2, 10, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 11, 1, 14, 8, 430867, tzinfo=datetime.timezone.utc), 14400, True, 14700, 58800), ('c5000000-0000-0000-0000-000000000023', 'a4000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000006', 'a5000000-0000-0000-0000-000000000018', 'b4000000-0000-0000-0000-000000000004', 'd4000000-0000-0000-0000-000000000002', 'Launch support and bug review — Franchise Location CMS', datetime.datetime(2026, 2, 17, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 18, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000024', 'a4000000-0000-0000-0000-000000000001', 'e4000000-0000-0000-0000-000000000006', 'a5000000-0000-0000-0000-000000000018', 'b4000000-0000-0000-0000-000000000002', 'd4000000-0000-0000-0000-000000000002', 'QA pass and issue triage — Franchise Location CMS', datetime.datetime(2026, 2, 24, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 24, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000027', 'a4000000-0000-0000-0000-000000000002', 'e4000000-0000-0000-0000-000000000007', 'a5000000-0000-0000-0000-000000000021', 'b4000000-0000-0000-0000-000000000006', 'd4000000-0000-0000-0000-000000000003', 'QA pass and issue triage — Fleet Control Tower', datetime.datetime(2026, 2, 19, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 20, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000028', 'a4000000-0000-0000-0000-000000000002', 'e4000000-0000-0000-0000-000000000007', 'a5000000-0000-0000-0000-000000000021', 'b4000000-0000-0000-0000-000000000008', 'd4000000-0000-0000-0000-000000000003', 'Release readiness checks — Fleet Control Tower', datetime.datetime(2026, 2, 26, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 26, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000030', 'a4000000-0000-0000-0000-000000000002', 'e4000000-0000-0000-0000-000000000008', 'a5000000-0000-0000-0000-000000000023', 'b4000000-0000-0000-0000-000000000010', 'd4000000-0000-0000-0000-000000000003', 'Core implementation workstream — Warehouse K8s Migration', datetime.datetime(2026, 2, 14, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 15, 1, 44, 8, 430867, tzinfo=datetime.timezone.utc), 16200, True, 27500, 123750), ('c5000000-0000-0000-0000-000000000031', 'a4000000-0000-0000-0000-000000000002', 'e4000000-0000-0000-0000-000000000008', 'a5000000-0000-0000-0000-000000000024', 'b4000000-0000-0000-0000-000000000007', 'd4000000-0000-0000-0000-000000000003', 'Release readiness checks — Warehouse K8s Migration', datetime.datetime(2026, 2, 21, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 22, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000032', 'a4000000-0000-0000-0000-000000000002', 'e4000000-0000-0000-0000-000000000008', 'a5000000-0000-0000-0000-000000000024', 'b4000000-0000-0000-0000-000000000009', 'd4000000-0000-0000-0000-000000000003', 'Launch support and bug review — Warehouse K8s Migration', datetime.datetime(2026, 2, 28, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 28, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000034', 'a4000000-0000-0000-0000-000000000002', 'e4000000-0000-0000-0000-000000000009', 'a5000000-0000-0000-0000-000000000026', 'b4000000-0000-0000-0000-000000000009', 'd4000000-0000-0000-0000-000000000003', 'Feature development and iteration — Driver Incident App API', datetime.datetime(2026, 2, 16, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 17, 1, 14, 8, 430867, tzinfo=datetime.timezone.utc), 14400, True, 26000, 104000), ('c5000000-0000-0000-0000-000000000035', 'a4000000-0000-0000-0000-000000000002', 'e4000000-0000-0000-0000-000000000009', 'a5000000-0000-0000-0000-000000000027', 'b4000000-0000-0000-0000-000000000006', 'd4000000-0000-0000-0000-000000000003', 'Launch support and bug review — Driver Incident App API', datetime.datetime(2026, 2, 23, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 24, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000036', 'a4000000-0000-0000-0000-000000000002', 'e4000000-0000-0000-0000-000000000009', 'a5000000-0000-0000-0000-000000000027', 'b4000000-0000-0000-0000-000000000008', 'd4000000-0000-0000-0000-000000000003', 'Post-launch support retrospective for Driver Incident App API', datetime.datetime(2026, 3, 2, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 2, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000039', 'a4000000-0000-0000-0000-000000000002', 'e4000000-0000-0000-0000-000000000010', 'a5000000-0000-0000-0000-000000000030', 'b4000000-0000-0000-0000-000000000009', 'd4000000-0000-0000-0000-000000000004', 'QA pass and issue triage — Zero Trust Rollout', datetime.datetime(2026, 2, 25, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 26, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000040', 'a4000000-0000-0000-0000-000000000002', 'e4000000-0000-0000-0000-000000000010', None, 'b4000000-0000-0000-0000-000000000007', 'd4000000-0000-0000-0000-000000000004', 'Internal sync for Zero Trust Rollout', datetime.datetime(2026, 3, 4, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 4, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000042', 'a4000000-0000-0000-0000-000000000002', 'e4000000-0000-0000-0000-000000000011', 'a5000000-0000-0000-0000-000000000032', 'b4000000-0000-0000-0000-000000000010', 'd4000000-0000-0000-0000-000000000004', 'Core implementation workstream — FinOps Savings Explorer', datetime.datetime(2026, 2, 20, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 21, 1, 14, 8, 430867, tzinfo=datetime.timezone.utc), 14400, True, 28000, 112000), ('c5000000-0000-0000-0000-000000000043', 'a4000000-0000-0000-0000-000000000002', 'e4000000-0000-0000-0000-000000000011', 'a5000000-0000-0000-0000-000000000033', 'b4000000-0000-0000-0000-000000000006', 'd4000000-0000-0000-0000-000000000004', 'Release readiness checks — FinOps Savings Explorer', datetime.datetime(2026, 2, 27, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 28, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000044', 'a4000000-0000-0000-0000-000000000002', 'e4000000-0000-0000-0000-000000000011', 'a5000000-0000-0000-0000-000000000033', 'b4000000-0000-0000-0000-000000000008', 'd4000000-0000-0000-0000-000000000004', 'Launch support and bug review — FinOps Savings Explorer', datetime.datetime(2026, 3, 6, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 6, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000046', 'a4000000-0000-0000-0000-000000000002', 'e4000000-0000-0000-0000-000000000012', 'a5000000-0000-0000-0000-000000000035', 'b4000000-0000-0000-0000-000000000007', 'd4000000-0000-0000-0000-000000000004', 'Feature development and iteration — Disaster Recovery Drills', datetime.datetime(2026, 2, 22, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 23, 1, 44, 8, 430867, tzinfo=datetime.timezone.utc), 16200, True, 27000, 121500), ('c5000000-0000-0000-0000-000000000047', 'a4000000-0000-0000-0000-000000000002', 'e4000000-0000-0000-0000-000000000012', 'a5000000-0000-0000-0000-000000000036', 'b4000000-0000-0000-0000-000000000009', 'd4000000-0000-0000-0000-000000000004', 'Launch support and bug review — Disaster Recovery Drills', datetime.datetime(2026, 3, 1, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 2, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000048', 'a4000000-0000-0000-0000-000000000002', 'e4000000-0000-0000-0000-000000000012', 'a5000000-0000-0000-0000-000000000036', 'b4000000-0000-0000-0000-000000000007', 'd4000000-0000-0000-0000-000000000004', 'Post-launch support retrospective for Disaster Recovery Drills', datetime.datetime(2026, 3, 8, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 8, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000051', 'a4000000-0000-0000-0000-000000000003', 'e4000000-0000-0000-0000-000000000013', 'a5000000-0000-0000-0000-000000000039', 'b4000000-0000-0000-0000-000000000011', 'd4000000-0000-0000-0000-000000000005', 'QA pass and issue triage — Patient App Revamp', datetime.datetime(2026, 3, 3, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 4, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000052', 'a4000000-0000-0000-0000-000000000003', 'e4000000-0000-0000-0000-000000000013', 'a5000000-0000-0000-0000-000000000039', 'b4000000-0000-0000-0000-000000000013', 'd4000000-0000-0000-0000-000000000005', 'Release readiness checks — Patient App Revamp', datetime.datetime(2026, 3, 10, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 10, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000054', 'a4000000-0000-0000-0000-000000000003', 'e4000000-0000-0000-0000-000000000014', 'a5000000-0000-0000-0000-000000000041', 'b4000000-0000-0000-0000-000000000015', 'd4000000-0000-0000-0000-000000000005', 'Core implementation workstream — Telemedicine Booking Portal', datetime.datetime(2026, 2, 26, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 2, 27, 1, 14, 8, 430867, tzinfo=datetime.timezone.utc), 14400, True, 20000, 80000), ('c5000000-0000-0000-0000-000000000055', 'a4000000-0000-0000-0000-000000000003', 'e4000000-0000-0000-0000-000000000014', 'a5000000-0000-0000-0000-000000000042', 'b4000000-0000-0000-0000-000000000012', 'd4000000-0000-0000-0000-000000000005', 'Release readiness checks — Telemedicine Booking Portal', datetime.datetime(2026, 3, 5, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 6, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000056', 'a4000000-0000-0000-0000-000000000003', 'e4000000-0000-0000-0000-000000000014', 'a5000000-0000-0000-0000-000000000042', 'b4000000-0000-0000-0000-000000000014', 'd4000000-0000-0000-0000-000000000005', 'Launch support and bug review — Telemedicine Booking Portal', datetime.datetime(2026, 3, 12, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 12, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000058', 'a4000000-0000-0000-0000-000000000003', 'e4000000-0000-0000-0000-000000000015', 'a5000000-0000-0000-0000-000000000044', 'b4000000-0000-0000-0000-000000000014', 'd4000000-0000-0000-0000-000000000005', 'Feature development and iteration — Insurance Claim Sync', datetime.datetime(2026, 2, 28, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 1, 1, 14, 8, 430867, tzinfo=datetime.timezone.utc), 14400, True, 19000, 76000), ('c5000000-0000-0000-0000-000000000059', 'a4000000-0000-0000-0000-000000000003', 'e4000000-0000-0000-0000-000000000015', 'a5000000-0000-0000-0000-000000000045', 'b4000000-0000-0000-0000-000000000011', 'd4000000-0000-0000-0000-000000000005', 'Launch support and bug review — Insurance Claim Sync', datetime.datetime(2026, 3, 7, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 8, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000060', 'a4000000-0000-0000-0000-000000000003', 'e4000000-0000-0000-0000-000000000015', None, 'b4000000-0000-0000-0000-000000000013', 'd4000000-0000-0000-0000-000000000005', 'Post-launch support retrospective for Insurance Claim Sync', datetime.datetime(2026, 3, 14, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 14, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000063', 'a4000000-0000-0000-0000-000000000003', 'e4000000-0000-0000-0000-000000000016', 'a5000000-0000-0000-0000-000000000048', 'b4000000-0000-0000-0000-000000000014', 'd4000000-0000-0000-0000-000000000006', 'QA pass and issue triage — Nutrition Coach Dashboard', datetime.datetime(2026, 3, 9, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 10, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000064', 'a4000000-0000-0000-0000-000000000003', 'e4000000-0000-0000-0000-000000000016', 'a5000000-0000-0000-0000-000000000048', 'b4000000-0000-0000-0000-000000000012', 'd4000000-0000-0000-0000-000000000006', 'Release readiness checks — Nutrition Coach Dashboard', datetime.datetime(2026, 3, 16, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 16, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000066', 'a4000000-0000-0000-0000-000000000003', 'e4000000-0000-0000-0000-000000000017', 'a5000000-0000-0000-0000-000000000050', 'b4000000-0000-0000-0000-000000000015', 'd4000000-0000-0000-0000-000000000006', 'Core implementation workstream — Wearable Data Sync', datetime.datetime(2026, 3, 4, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 5, 1, 14, 8, 430867, tzinfo=datetime.timezone.utc), 14400, True, 17700, 70800), ('c5000000-0000-0000-0000-000000000067', 'a4000000-0000-0000-0000-000000000003', 'e4000000-0000-0000-0000-000000000017', 'a5000000-0000-0000-0000-000000000051', 'b4000000-0000-0000-0000-000000000011', 'd4000000-0000-0000-0000-000000000006', 'Release readiness checks — Wearable Data Sync', datetime.datetime(2026, 3, 11, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 12, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000068', 'a4000000-0000-0000-0000-000000000003', 'e4000000-0000-0000-0000-000000000017', 'a5000000-0000-0000-0000-000000000051', 'b4000000-0000-0000-0000-000000000013', 'd4000000-0000-0000-0000-000000000006', 'Launch support and bug review — Wearable Data Sync', datetime.datetime(2026, 3, 18, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 18, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000070', 'a4000000-0000-0000-0000-000000000003', 'e4000000-0000-0000-0000-000000000018', 'a5000000-0000-0000-0000-000000000053', 'b4000000-0000-0000-0000-000000000012', 'd4000000-0000-0000-0000-000000000006', 'Feature development and iteration — Habit Challenge Engine', datetime.datetime(2026, 3, 6, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 7, 1, 14, 8, 430867, tzinfo=datetime.timezone.utc), 14400, True, 17500, 70000), ('c5000000-0000-0000-0000-000000000071', 'a4000000-0000-0000-0000-000000000003', 'e4000000-0000-0000-0000-000000000018', 'a5000000-0000-0000-0000-000000000054', 'b4000000-0000-0000-0000-000000000014', 'd4000000-0000-0000-0000-000000000006', 'Paused coordination for on-hold project Habit Challenge Engine', datetime.datetime(2026, 3, 13, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 14, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000072', 'a4000000-0000-0000-0000-000000000003', 'e4000000-0000-0000-0000-000000000018', 'a5000000-0000-0000-0000-000000000054', 'b4000000-0000-0000-0000-000000000012', 'd4000000-0000-0000-0000-000000000006', 'Paused coordination for on-hold project Habit Challenge Engine', datetime.datetime(2026, 3, 20, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 20, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000075', 'a4000000-0000-0000-0000-000000000004', 'e4000000-0000-0000-0000-000000000019', 'a5000000-0000-0000-0000-000000000057', 'b4000000-0000-0000-0000-000000000016', 'd4000000-0000-0000-0000-000000000007', 'QA pass and issue triage — Executive Risk Dashboard', datetime.datetime(2026, 3, 15, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 16, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000076', 'a4000000-0000-0000-0000-000000000004', 'e4000000-0000-0000-0000-000000000019', 'a5000000-0000-0000-0000-000000000057', 'b4000000-0000-0000-0000-000000000018', 'd4000000-0000-0000-0000-000000000007', 'Release readiness checks — Executive Risk Dashboard', datetime.datetime(2026, 3, 22, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 22, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000078', 'a4000000-0000-0000-0000-000000000004', 'e4000000-0000-0000-0000-000000000020', 'a5000000-0000-0000-0000-000000000059', 'b4000000-0000-0000-0000-000000000020', 'd4000000-0000-0000-0000-000000000007', 'Core implementation workstream — Collections Workflow Automation', datetime.datetime(2026, 3, 10, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 11, 1, 44, 8, 430867, tzinfo=datetime.timezone.utc), 16200, True, 23300, 104850), ('c5000000-0000-0000-0000-000000000079', 'a4000000-0000-0000-0000-000000000004', 'e4000000-0000-0000-0000-000000000020', 'a5000000-0000-0000-0000-000000000060', 'b4000000-0000-0000-0000-000000000017', 'd4000000-0000-0000-0000-000000000007', 'Release readiness checks — Collections Workflow Automation', datetime.datetime(2026, 3, 17, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 18, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000080', 'a4000000-0000-0000-0000-000000000004', 'e4000000-0000-0000-0000-000000000020', None, 'b4000000-0000-0000-0000-000000000019', 'd4000000-0000-0000-0000-000000000007', 'Internal sync for Collections Workflow Automation', datetime.datetime(2026, 3, 24, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 24, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000082', 'a4000000-0000-0000-0000-000000000004', 'e4000000-0000-0000-0000-000000000021', 'a5000000-0000-0000-0000-000000000062', 'b4000000-0000-0000-0000-000000000019', 'd4000000-0000-0000-0000-000000000007', 'Feature development and iteration — Loan Origination UI Refresh', datetime.datetime(2026, 3, 12, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 13, 1, 14, 8, 430867, tzinfo=datetime.timezone.utc), 14400, True, 23000, 92000), ('c5000000-0000-0000-0000-000000000083', 'a4000000-0000-0000-0000-000000000004', 'e4000000-0000-0000-0000-000000000021', 'a5000000-0000-0000-0000-000000000063', 'b4000000-0000-0000-0000-000000000016', 'd4000000-0000-0000-0000-000000000007', 'Launch support and bug review — Loan Origination UI Refresh', datetime.datetime(2026, 3, 19, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 20, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000084', 'a4000000-0000-0000-0000-000000000004', 'e4000000-0000-0000-0000-000000000021', 'a5000000-0000-0000-0000-000000000063', 'b4000000-0000-0000-0000-000000000018', 'd4000000-0000-0000-0000-000000000007', 'Post-launch support retrospective for Loan Origination UI Refresh', datetime.datetime(2026, 3, 26, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 26, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000087', 'a4000000-0000-0000-0000-000000000004', 'e4000000-0000-0000-0000-000000000022', 'a5000000-0000-0000-0000-000000000066', 'b4000000-0000-0000-0000-000000000019', 'd4000000-0000-0000-0000-000000000008', 'QA pass and issue triage — Valuation Model Workbench', datetime.datetime(2026, 3, 21, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 22, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000088', 'a4000000-0000-0000-0000-000000000004', 'e4000000-0000-0000-0000-000000000022', 'a5000000-0000-0000-0000-000000000066', 'b4000000-0000-0000-0000-000000000017', 'd4000000-0000-0000-0000-000000000008', 'Release readiness checks — Valuation Model Workbench', datetime.datetime(2026, 3, 28, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 28, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000090', 'a4000000-0000-0000-0000-000000000004', 'e4000000-0000-0000-0000-000000000023', 'a5000000-0000-0000-0000-000000000068', 'b4000000-0000-0000-0000-000000000020', 'd4000000-0000-0000-0000-000000000008', 'Core implementation workstream — Broker Deal Tracker', datetime.datetime(2026, 3, 16, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 17, 1, 14, 8, 430867, tzinfo=datetime.timezone.utc), 14400, True, 18500, 74000), ('c5000000-0000-0000-0000-000000000091', 'a4000000-0000-0000-0000-000000000004', 'e4000000-0000-0000-0000-000000000023', 'a5000000-0000-0000-0000-000000000069', 'b4000000-0000-0000-0000-000000000016', 'd4000000-0000-0000-0000-000000000008', 'Release readiness checks — Broker Deal Tracker', datetime.datetime(2026, 3, 23, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 24, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000092', 'a4000000-0000-0000-0000-000000000004', 'e4000000-0000-0000-0000-000000000023', 'a5000000-0000-0000-0000-000000000069', 'b4000000-0000-0000-0000-000000000018', 'd4000000-0000-0000-0000-000000000008', 'Launch support and bug review — Broker Deal Tracker', datetime.datetime(2026, 3, 30, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 30, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000094', 'a4000000-0000-0000-0000-000000000004', 'e4000000-0000-0000-0000-000000000024', 'a5000000-0000-0000-0000-000000000071', 'b4000000-0000-0000-0000-000000000017', 'd4000000-0000-0000-0000-000000000008', 'Feature development and iteration — Investor Report Generator', datetime.datetime(2026, 3, 18, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 19, 1, 44, 8, 430867, tzinfo=datetime.timezone.utc), 16200, True, 18300, 82350), ('c5000000-0000-0000-0000-000000000095', 'a4000000-0000-0000-0000-000000000004', 'e4000000-0000-0000-0000-000000000024', 'a5000000-0000-0000-0000-000000000072', 'b4000000-0000-0000-0000-000000000019', 'd4000000-0000-0000-0000-000000000008', 'Launch support and bug review — Investor Report Generator', datetime.datetime(2026, 3, 25, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 26, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000096', 'a4000000-0000-0000-0000-000000000004', 'e4000000-0000-0000-0000-000000000024', 'a5000000-0000-0000-0000-000000000072', 'b4000000-0000-0000-0000-000000000017', 'd4000000-0000-0000-0000-000000000008', 'Post-launch support retrospective for Investor Report Generator', datetime.datetime(2026, 4, 1, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 4, 1, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000099', 'a4000000-0000-0000-0000-000000000005', 'e4000000-0000-0000-0000-000000000025', 'a5000000-0000-0000-0000-000000000075', 'b4000000-0000-0000-0000-000000000021', 'd4000000-0000-0000-0000-000000000009', 'QA pass and issue triage — LMS Revamp', datetime.datetime(2026, 3, 27, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 28, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000100', 'a4000000-0000-0000-0000-000000000005', 'e4000000-0000-0000-0000-000000000025', None, 'b4000000-0000-0000-0000-000000000023', 'd4000000-0000-0000-0000-000000000009', 'Internal sync for LMS Revamp', datetime.datetime(2026, 4, 3, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 4, 3, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000102', 'a4000000-0000-0000-0000-000000000005', 'e4000000-0000-0000-0000-000000000026', 'a5000000-0000-0000-0000-000000000077', 'b4000000-0000-0000-0000-000000000022', 'd4000000-0000-0000-0000-000000000009', 'Core implementation workstream — Adaptive Quiz Engine', datetime.datetime(2026, 3, 22, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 23, 1, 14, 8, 430867, tzinfo=datetime.timezone.utc), 14400, True, 16300, 65200), ('c5000000-0000-0000-0000-000000000103', 'a4000000-0000-0000-0000-000000000005', 'e4000000-0000-0000-0000-000000000026', 'a5000000-0000-0000-0000-000000000078', 'b4000000-0000-0000-0000-000000000024', 'd4000000-0000-0000-0000-000000000009', 'Release readiness checks — Adaptive Quiz Engine', datetime.datetime(2026, 3, 29, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 30, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000104', 'a4000000-0000-0000-0000-000000000005', 'e4000000-0000-0000-0000-000000000026', 'a5000000-0000-0000-0000-000000000078', 'b4000000-0000-0000-0000-000000000022', 'd4000000-0000-0000-0000-000000000009', 'Launch support and bug review — Adaptive Quiz Engine', datetime.datetime(2026, 4, 5, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 4, 5, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000106', 'a4000000-0000-0000-0000-000000000005', 'e4000000-0000-0000-0000-000000000027', 'a5000000-0000-0000-0000-000000000080', 'b4000000-0000-0000-0000-000000000021', 'd4000000-0000-0000-0000-000000000009', 'Feature development and iteration — Teacher Portal', datetime.datetime(2026, 3, 24, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 25, 1, 14, 8, 430867, tzinfo=datetime.timezone.utc), 14400, True, 15500, 62000), ('c5000000-0000-0000-0000-000000000107', 'a4000000-0000-0000-0000-000000000005', 'e4000000-0000-0000-0000-000000000027', 'a5000000-0000-0000-0000-000000000081', 'b4000000-0000-0000-0000-000000000023', 'd4000000-0000-0000-0000-000000000009', 'Launch support and bug review — Teacher Portal', datetime.datetime(2026, 3, 31, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 4, 1, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000108', 'a4000000-0000-0000-0000-000000000005', 'e4000000-0000-0000-0000-000000000027', 'a5000000-0000-0000-0000-000000000081', 'b4000000-0000-0000-0000-000000000021', 'd4000000-0000-0000-0000-000000000009', 'Post-launch support retrospective for Teacher Portal', datetime.datetime(2026, 4, 7, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 4, 7, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000111', 'a4000000-0000-0000-0000-000000000005', 'e4000000-0000-0000-0000-000000000028', 'a5000000-0000-0000-0000-000000000084', 'b4000000-0000-0000-0000-000000000024', 'd4000000-0000-0000-0000-000000000010', 'QA pass and issue triage — Creator Media Kit CMS', datetime.datetime(2026, 4, 2, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 4, 3, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000112', 'a4000000-0000-0000-0000-000000000005', 'e4000000-0000-0000-0000-000000000028', 'a5000000-0000-0000-0000-000000000084', 'b4000000-0000-0000-0000-000000000022', 'd4000000-0000-0000-0000-000000000010', 'Release readiness checks — Creator Media Kit CMS', datetime.datetime(2026, 4, 9, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 4, 9, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000114', 'a4000000-0000-0000-0000-000000000005', 'e4000000-0000-0000-0000-000000000029', 'a5000000-0000-0000-0000-000000000086', 'b4000000-0000-0000-0000-000000000024', 'd4000000-0000-0000-0000-000000000010', 'Core implementation workstream — Affiliate Revenue Reporting', datetime.datetime(2026, 3, 28, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 29, 1, 14, 8, 430867, tzinfo=datetime.timezone.utc), 14400, True, 14100, 56400), ('c5000000-0000-0000-0000-000000000115', 'a4000000-0000-0000-0000-000000000005', 'e4000000-0000-0000-0000-000000000029', 'a5000000-0000-0000-0000-000000000087', 'b4000000-0000-0000-0000-000000000021', 'd4000000-0000-0000-0000-000000000010', 'Release readiness checks — Affiliate Revenue Reporting', datetime.datetime(2026, 4, 4, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 4, 5, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000116', 'a4000000-0000-0000-0000-000000000005', 'e4000000-0000-0000-0000-000000000029', 'a5000000-0000-0000-0000-000000000087', 'b4000000-0000-0000-0000-000000000023', 'd4000000-0000-0000-0000-000000000010', 'Launch support and bug review — Affiliate Revenue Reporting', datetime.datetime(2026, 4, 11, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 4, 11, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0), ('c5000000-0000-0000-0000-000000000118', 'a4000000-0000-0000-0000-000000000005', 'e4000000-0000-0000-0000-000000000030', 'a5000000-0000-0000-0000-000000000089', 'b4000000-0000-0000-0000-000000000023', 'd4000000-0000-0000-0000-000000000010', 'Feature development and iteration — Trip Planner Community Feed', datetime.datetime(2026, 3, 30, 21, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 3, 31, 1, 14, 8, 430867, tzinfo=datetime.timezone.utc), 14400, True, 14000, 56000), ('c5000000-0000-0000-0000-000000000119', 'a4000000-0000-0000-0000-000000000005', 'e4000000-0000-0000-0000-000000000030', 'a5000000-0000-0000-0000-000000000090', 'b4000000-0000-0000-0000-000000000022', 'd4000000-0000-0000-0000-000000000010', 'Paused coordination for on-hold project Trip Planner Community Feed', datetime.datetime(2026, 4, 6, 23, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 4, 7, 2, 14, 8, 430867, tzinfo=datetime.timezone.utc), 10800, False, 0, 0), ('c5000000-0000-0000-0000-000000000120', 'a4000000-0000-0000-0000-000000000005', 'e4000000-0000-0000-0000-000000000030', None, 'b4000000-0000-0000-0000-000000000024', 'd4000000-0000-0000-0000-000000000010', 'Paused coordination for on-hold project Trip Planner Community Feed', datetime.datetime(2026, 4, 13, 19, 14, 8, 430867, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 4, 13, 20, 44, 8, 430867, tzinfo=datetime.timezone.utc), 5400, False, 0, 0)]
+    Status: ✅ Success
+    Tokens: total=1791  input=1638  output=153
+------------------------------------------------------------
+
+[20] Q: โปรเจกต์ใดบ้างที่ตั้งงบแบบชั่วโมง และใช้เวลาไปแล้วเกินงบ
+    Retrieved: projects, time_entries, project_tasks, clients, invoice_items
+    SQL:
+SELECT
+  p.name
+FROM projects AS p
+JOIN time_entries AS te
+  ON p.id = te.project_id
+WHERE
+  p.budget_type = 'hours' AND p.budget_hours IS NOT NULL
+GROUP BY
+  p.id,
+  p.name,
+  p.budget_hours
+HAVING
+  SUM(te.duration_seconds) > (p.budget_hours * 3600);
+    Result: []
+    Status: ✅ Success
+    Tokens: total=1881  input=1780  output=101
+------------------------------------------------------------
+
+[21] Q: โปรเจกต์ใดบ้างที่ตั้งงบแบบจำนวนเงิน และมีมูลค่าเวลางานรวมเกินงบ
+    Retrieved: projects, project_tasks, time_entries, invoice_items, clients
+    SQL:
+SELECT
+  p.name
+FROM projects AS p
+JOIN time_entries AS te
+  ON p.id = te.project_id
+WHERE
+  p.budget_type = 'amount'
+GROUP BY
+  p.id,
+  p.name,
+  p.budget_amount_cents
+HAVING
+  SUM(te.amount_cents) > p.budget_amount_cents;
+    Result: []
+    Status: ✅ Success
+    Tokens: total=1872  input=1783  output=89
+------------------------------------------------------------
+
+[22] Q: ผู้ใช้คนใดอยู่มากกว่าหนึ่งทีม
+    Retrieved: team_membership, users, teams, project_members, task_assignees
+    SQL:
+SELECT T1.id, T1.name FROM users AS T1 JOIN team_memberships AS T2 ON T1.id = T2.user_id GROUP BY T1.id, T1.name HAVING count(T2.team_id) > 1
+    Result: [('b4000000-0000-0000-0000-000000000014', 'Paul Kim'), ('b4000000-0000-0000-0000-000000000022', 'Peem Nop'), ('b1000000-0000-0000-0000-000000000001', 'Alice Tanaka'), ('b4000000-0000-0000-0000-000000000009', 'Sara Lim'), ('b4000000-0000-0000-0000-000000000001', 'Mina Chen'), ('b4000000-0000-0000-0000-000000000019', 'Aom Rung'), ('72521442-e104-4783-a7d0-0157a489ca1e', 'Worada Sarakhon')]
+    Status: ✅ Success
+    Tokens: total=1191  input=1132  output=59
+------------------------------------------------------------
+
+[23] Q: ผู้ใช้คนใดอยู่ในทีมแล้ว แต่ยังไม่ได้ถูกเพิ่มเข้าโปรเจกต์ใดเลย
+    Retrieved: project_members, team_membership, users, teams, invites
+    SQL:
+SELECT
+  u.id,
+  u.email,
+  u.name
+FROM users AS u
+JOIN team_memberships AS tm
+  ON u.id = tm.user_id
+LEFT JOIN project_members AS pm
+  ON u.id = pm.user_id
+WHERE
+  pm.user_id IS NULL;
+    Result: [('72521442-e104-4783-a7d0-0157a489ca1e', 'patworada2004@gmail.com', 'Worada Sarakhon'), ('72521442-e104-4783-a7d0-0157a489ca1e', 'patworada2004@gmail.com', 'Worada Sarakhon')]
+    Status: ✅ Success
+    Tokens: total=1291  input=1216  output=75
+------------------------------------------------------------
+
+[24] Q: งานใดบ้างที่ยังไม่มีผู้รับผิดชอบ
+    Retrieved: task_assignees, project_tasks, projects, time_entries, project_members
+    SQL:
+SELECT
+  pt.id,
+  pt.name
+FROM project_tasks AS pt
+LEFT JOIN task_assignees AS ta
+  ON pt.id = ta.task_id
+WHERE
+  ta.task_id IS NULL;
+    Result: [('a2000000-0000-0000-0000-000000000004', 'Internal Meeting'), ('a2000000-0000-0000-0000-000000000007', 'Push Notifications'), ('a2000000-0000-0000-0000-000000000012', 'Monitoring Stack'), ('a2000000-0000-0000-0000-000000000014', 'Report Writing')]
+    Status: ✅ Success
+    Tokens: total=1629  input=1577  output=52
+------------------------------------------------------------
+
+[25] Q: ลูกค้ารายใดมีมูลค่าใบแจ้งหนี้ที่จ่ายแล้วรวมสูงที่สุด
+    Retrieved: invoices, clients, projects, invoice_items, users
+    SQL:
+SELECT
+  c.name
+FROM
+  clients AS c
+JOIN
+  invoices AS i
+ON
+  c.id = i.client_id
+WHERE
+  i.status = 'paid'
+GROUP BY
+  c.id, c.name
+ORDER BY
+  SUM(i.total_cents) DESC
+LIMIT 1;
+    Result: [('CloudNine Singapore',)]
+    Status: ✅ Success
+    Tokens: total=1812  input=1736  output=76
+------------------------------------------------------------
+
+[26] Q: ผู้ใช้คนใดทำงานให้ลูกค้าหลากหลายรายมากที่สุด และลูกค้ารายใดที่ผู้ใช้นั้นใช้เวลาไปมากที่สุด
+    Retrieved: projects, clients, users, task_assignees, sessions
+    SQL:
+SELECT
+  u.name AS user_name,
+  u.email AS user_email,
+  COUNT(DISTINCT c.id) AS distinct_clients_count,
+  MAX(client_with_most_projects.client_name) AS client_with_most_projects_name
+FROM users AS u
+JOIN task_assignees AS ta
+  ON u.id = ta.user_id
+JOIN project_tasks AS pt
+  ON ta.task_id = pt.id
+JOIN projects AS p
+  ON pt.project_id = p.id
+JOIN clients AS c
+  ON p.client_id = c.id
+LEFT JOIN (
+  SELECT
+    u_inner.id AS user_id,
+    c_inner.name AS client_name,
+    COUNT(p_inner.id) AS project_count,
+    ROW_NUMBER() OVER (PARTITION BY u_inner.id ORDER BY COUNT(p_inner.id) DESC) AS rn
+  FROM users AS u_inner
+  JOIN task_assignees AS ta_inner
+    ON u_inner.id = ta_inner.user_id
+  JOIN project_tasks AS pt_inner
+    ON ta_inner.task_id = pt_inner.id
+  JOIN projects AS p_inner
+    ON pt_inner.project_id = p_inner.id
+  JOIN clients AS c_inner
+    ON p_inner.client_id = c_inner.id
+  GROUP BY
+    u_inner.id,
+    c_inner.name
+) AS client_with_most_projects
+  ON u.id = client_with_most_projects.user_id
+  AND client_with_most_projects.rn = 1
+GROUP BY
+  u.id,
+  u.name,
+  u.email
+ORDER BY
+  distinct_clients_count DESC,
+  user_name
+LIMIT 1;
+    Result: [('Aom Rung', 'aom@ledgerleaf.io', 2, 'PropSense Realty')]
+    Status: ✅ Success
+    Tokens: total=1808  input=1377  output=431
+------------------------------------------------------------
+
+[27] Q: โปรเจกต์ใดมีสมาชิกน้อย แต่มีชั่วโมงงานรวมสูงที่สุด
+    Retrieved: projects, time_entries, project_members, project_tasks, clients
+    SQL:
+SELECT
+  p.name
+FROM projects AS p
+JOIN time_entries AS te
+  ON p.id = te.project_id
+GROUP BY
+  p.id,
+  p.name
+HAVING
+  COUNT(DISTINCT pm.user_id) = (
+    SELECT
+      COUNT(DISTINCT pm2.user_id)
+    FROM project_members AS pm2
+    WHERE
+      pm2.project_id = p.id
+  )
+ORDER BY
+  SUM(te.duration_seconds) DESC
+LIMIT 1;
+    Result: []
+    Status: ❌ Error: missing FROM-clause entry for table "pm"
+LINE 10:   COUNT(DISTINCT pm.user_id) = (
+                          ^
+
+    Tokens: total=1869  input=1746  output=123
+------------------------------------------------------------
+
+[28] Q: ทีมใดมีชั่วโมงงานที่คิดเงินได้สูง แต่ยอดใบแจ้งหนี้ที่จ่ายแล้วรวมยังไม่สูงตาม
+    Retrieved: invoice_items, invoices, projects, clients, time_entries
+    SQL:
+SELECT
+  t.id AS team_id,
+  SUM(CASE WHEN te.billable THEN te.duration_seconds ELSE 0 END) / 3600.0 AS total_billable_hours,
+  SUM(CASE WHEN i.status = 'paid' THEN i.total_cents ELSE 0 END) AS total_paid_invoice_amount_cents
+FROM teams AS t
+LEFT JOIN time_entries AS te
+  ON t.id = te.team_id
+LEFT JOIN invoices AS i
+  ON t.id = i.team_id
+GROUP BY
+  t.id
+ORDER BY
+  total_billable_hours DESC,
+  total_paid_invoice_amount_cents ASC;
+    Result: [('a1000000-0000-0000-0000-000000000001', Decimal('332.0000000000000000'), 13236300), ('a4000000-0000-0000-0000-000000000004', Decimal('160.0000000000000000'), 5264400), ('a4000000-0000-0000-0000-000000000002', Decimal('160.0000000000000000'), 7029288), ('a4000000-0000-0000-0000-000000000005', Decimal('158.0000000000000000'), 3768552), ('a4000000-0000-0000-0000-000000000001', Decimal('158.0000000000000000'), 3852000), ('a4000000-0000-0000-0000-000000000003', Decimal('158.0000000000000000'), 4699440), ('a1000000-0000-0000-0000-000000000002', Decimal('82.0000000000000000'), 4414500), ('6eb9a25a-ec68-464b-a265-0eba6a0f8baa', Decimal('0E-20'), 0)]
+    Status: ✅ Success
+    Tokens: total=2043  input=1884  output=159
+------------------------------------------------------------
+
+[29] Q: ลูกค้ารายใดมีเวลางานรวมมาก แต่ยังมีบันทึกเวลาที่ยังไม่ถูกนำไปออกบิลมากที่สุด
+    Retrieved: clients, time_entries, projects, invoice_time_entries, invoice_items
+    SQL:
+SELECT
+  c.name
+FROM clients AS c
+JOIN projects AS p
+  ON c.id = p.client_id
+JOIN time_entries AS te
+  ON p.id = te.project_id
+LEFT JOIN invoice_time_entries AS ite
+  ON te.id = ite.time_entry_id
+WHERE
+  te.duration_seconds IS NOT NULL AND te.billable = TRUE
+GROUP BY
+  c.id,
+  c.name
+ORDER BY
+  SUM(CASE WHEN ite.time_entry_id IS NULL THEN te.duration_seconds ELSE 0 END) DESC,
+  SUM(te.duration_seconds) DESC
+LIMIT 1;
+    Result: [('PropSense Realty',)]
+    Status: ✅ Success
+    Tokens: total=1835  input=1681  output=154
+------------------------------------------------------------
+
+[30] Q: ผู้ใช้คนใดรับผิดชอบหลายงานในโปรเจกต์เดียวกัน และลงเวลารวมในโปรเจกต์นั้นมากกว่าค่าเฉลี่ยของสมาชิกคนอื่นในโปรเจกต์เดียวกัน
+    Retrieved: project_members, task_assignees, projects, time_entries, project_tasks
+    SQL:
+WITH UserProjectTaskCounts AS (
+    SELECT
+        project_id,
+        user_id,
+        COUNT(DISTINCT task_id) AS num_tasks
+    FROM
+        task_assignees
+    GROUP BY
+        project_id,
+        user_id
+    HAVING
+        COUNT(DISTINCT task_id) > 1
+),
+UserProjectTotalTime AS (
+    SELECT
+        project_id,
+        user_id,
+        SUM(duration_seconds) AS total_duration_seconds
+    FROM
+        time_entries
+    WHERE
+        duration_seconds IS NOT NULL
+    GROUP BY
+        project_id,
+        user_id
+),
+ProjectMemberAvgTime AS (
+    SELECT
+        project_id,
+        user_id,
+        total_duration_seconds,
+        (SUM(total_duration_seconds) OVER (PARTITION BY project_id) - total_duration_seconds) /
+        NULLIF((COUNT(user_id) OVER (PARTITION BY project_id) - 1), 0) AS avg_other_members_duration
+    FROM
+        UserProjectTotalTime
+)
+SELECT DISTINCT
+    pm.user_id
+FROM
+    ProjectMemberAvgTime AS pm
+JOIN
+    UserProjectTaskCounts AS utc
+    ON pm.project_id = utc.project_id AND pm.user_id = utc.user_id
+WHERE
+    pm.total_duration_seconds > pm.avg_other_members_duration
+    AND pm.avg_other_members_duration IS NOT NULL;
+    Result: []
+    Status: ❌ Error: column "project_id" does not exist
+LINE 3:         project_id,
+                ^
+
+    Tokens: total=1956  input=1608  output=348
+------------------------------------------------------------
+
+Summary
+  Total questions : 30
+  Success         : 28
+  Failed          : 2
+  Accuracy        : 93.3%
+  Total tokens    : 48624
+  Avg tokens/Q    : 1620
